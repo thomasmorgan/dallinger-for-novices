@@ -1,0 +1,206 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Infos &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Transmissions" href="transmission.html" />
+    <link rel="prev" title="Vectors" href="vector.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="infos">
+<h1>Infos<a class="headerlink" href="#infos" title="Permalink to this headline">¶</a></h1>
+<p>Infos are another type of object created by Dallinger. Just like Vectors and Nodes, they have their own dedicated table in the database.</p>
+<div class="figure">
+<img alt="" src="_static/class_chart.jpg" />
+</div>
+<div class="section" id="what-is-an-info">
+<h2>What is an Info?<a class="headerlink" href="#what-is-an-info" title="Permalink to this headline">¶</a></h2>
+<p>An Info represents a single chunk of information created by a Node. If you haven’t already read the tutorial page on Nodes you should definitely do that now as it covers a lot of stuff we’ll partially skip over in this page. We’ve previously used the London Underground train network and social networks as analogies for a Dallinger network. For Infos, the social network analogy works best. If user accounts are the equivalent of Nodes, then posts are the equivalent of Infos. Note that just because an Info has been created, it doesn’t mean that anyone else will ever see it. Posts created by a user with no friends won’t be able to reach anyone else in the network, in the same way, Infos created by a Node with no Vectors linking them to other Nodes will only ever by viewable by the Node that created them.</p>
+<p>From the diagram above we can see that Infos have a single requirement: Nodes. This means that Infos cannot exist without a Node as their origin - i.e. someone has to have created them and they are not allowed to “just exist”. The creator doesn’t have to be a human however, and Infos can certainly be created by AI Nodes as part of some pre-specified Info creation procedure. For more on this go back and read about Sources which we covered in the page on Nodes.</p>
+</div>
+<div class="section" id="the-info-table">
+<h2>The Info Table<a class="headerlink" href="#the-info-table" title="Permalink to this headline">¶</a></h2>
+<p>The first port of call in order to understand a database class, like <code class="docutils literal notranslate"><span class="pre">Info</span></code>, is to examine the columns of the database table. Again, we can do this the easy way via Postico, but because this is a fun learning experience we’ll look directly at the code. So open up models.py and find the class <code class="docutils literal notranslate"><span class="pre">Info</span></code> by looking for this line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">SharedMixin</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>The first thing to note is that, just like <code class="docutils literal notranslate"><span class="pre">Node</span></code> and <code class="docutils literal notranslate"><span class="pre">Vector</span></code>, <code class="docutils literal notranslate"><span class="pre">Info</span></code> extends the classes <code class="docutils literal notranslate"><span class="pre">Base</span></code> (which allows it to make a table) and <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>. We covered <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> when discussing Nodes, but in short it gives the table a bunch of commonly used columns like <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">creation_time</span></code>, <code class="docutils literal notranslate"><span class="pre">property1</span></code>, <code class="docutils literal notranslate"><span class="pre">failed</span></code> and so on. For more information on what these columns do see the Node page, but for now let’s press on with the columns that are unique to <code class="docutils literal notranslate"><span class="pre">Info</span></code>. First is the <code class="docutils literal notranslate"><span class="pre">origin_id</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: the id of the Node that created the info</span>
+<span class="n">origin_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;node.id&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the Node that created the info.</span>
+<span class="n">origin</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Node</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s1">&#39;all_infos&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Hopefully this should be quite familiar by now because it’s virtually identical to the <code class="docutils literal notranslate"><span class="pre">origin_id</span></code> and <code class="docutils literal notranslate"><span class="pre">origin</span></code> relationship of the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> class. Given this I can basically be lazy and copy/paste the description from the previous page with a few edits:</p>
+<p>“So we can see a column is created called <code class="docutils literal notranslate"><span class="pre">origin_id</span></code>, it will store an integer, it’s going to be the id of a Node and it’s indexed (this last bit just means the table will run quickly). As you might have guessed this column will store the id of the Node from which the [Info] originates.</p>
+<p>The next bit creates not a column, but a relationship, called <code class="docutils literal notranslate"><span class="pre">origin</span></code>. Relationships aren’t visible in the table, but it means that at runtime, you can ask [an Info] directly for its origin and it will return to you a Node object. This is much faster than asking for its origin_id and then looking up which Node has that id in the Node table. This is another example of how database/object duality works in our favor when using Dallinger.”</p>
+<p>Infos also have a <code class="docutils literal notranslate"><span class="pre">network_id</span></code> and <code class="docutils literal notranslate"><span class="pre">network</span></code>, which again, are basically the same as for Vectors, so I won’t bother going through them again. What we will go into, however, is the final column that really is unique to Infos; the <code class="docutils literal notranslate"><span class="pre">contents</span></code> column.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: the contents of the info. Must be stored as a String.</span>
+<span class="n">contents</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">(),</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is all very straightforward. We’re creating a column called <code class="docutils literal notranslate"><span class="pre">contents</span></code>, it will store <code class="docutils literal notranslate"><span class="pre">Text</span></code> (which means a long String) and it has no default value. Note that unlike many other columns we’re not going to index this. This is because the contexts of this column are going to be highly variable depending on any given experimental design and so we’re unlikely to be regularly doing queries over the Info table for Infos with specific contents.</p>
+<p>To quickly provide some examples of how you might use this column:</p>
+<ol class="arabic simple">
+<li>Imagine you give participants a series of yes/no questions. For each question they answer you’ll create a new Info and the contents will either be “yes” or “no”.</li>
+<li>This time give people math problems. Their answer will be a number, e.g. 13, but this is fine, when you save it as the contents of an Info it will simply be converted to the String “13”.</li>
+<li>Now try a free response box when participants get to tell you what they thought of your experiment. In this case you’ll store entire paragraphs of text in the contents column.</li>
+<li>What if you ask participants to draw an image? Well most common image formats can be easily converted to a text representation and this is what you’ll store as the contents of an Info.</li>
+</ol>
+<p>Is there any limit to how much text you can put in the contents column? Yes there is, though I’ve never personally run up against it. That said, if you decided to try to store a textbased representation of Shrek 3 4K 3D I am sure you will have problems. For storing really large files you’l probably want to host the file on a server elsewhere and save the url to the file in the Info.</p>
+</div>
+<div class="section" id="info-objects">
+<h2>Info Objects<a class="headerlink" href="#info-objects" title="Permalink to this headline">¶</a></h2>
+<p>Most of the functions that Infos have are extremely similar to those of Nodes and Vectors (e.g. <code class="docutils literal notranslate"><span class="pre">init</span></code>, <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">json</span></code>), so I’m not going to keep repeating myself and instead I’ll focus on just the new elements of Infos. The first is this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@validates</span><span class="p">(</span><span class="s2">&quot;contents&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_write_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The contents of an info is write-once.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>This mysterious chunk of code exists just to stop you changing the contents of an Info once it has already been created. We set Infos up this way to stop people accidentally overwriting valuable information which they then can’t get back. If you end up in a scenario where you actually want to change the contents of an Info, you should fail the old Info and just create a new one with the contents you want (if you’re feeling fancy you can link the old and new Infos via a Transformation, but more on that in a few pages.)</p>
+<p>Next is <code class="docutils literal notranslate"><span class="pre">info.transmissions()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">transmissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get all the transmissions of this info.</span>
+
+<span class="sd">    status can be all/pending/received.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;pending&quot;</span><span class="p">,</span> <span class="s2">&quot;received&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;You cannot get transmission of status </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">status</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s2">&quot;Status can only be pending, received or all&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Transmission</span>\
+            <span class="o">.</span><span class="n">query</span>\
+            <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">info_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                       <span class="n">failed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Transmission</span>\
+            <span class="o">.</span><span class="n">query</span>\
+            <span class="o">.</span><span class="n">filterby</span><span class="p">(</span><span class="n">info_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                      <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+                      <span class="n">failed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Every time an Info is sent from one Node to another, a Transmission object is created (we’ll cover them on the next page). This function asks an Info to return a list of all the transmission objects associated with it, effectively a list that describes all the times this Info was sent to other Nodes. Just like the similar function for Vectors, you can filter by the status of the Transmissions, either “all”, “received” or “pending”.</p>
+<p>Infos also have a <code class="docutils literal notranslate"><span class="pre">transformations()</span></code> function. Transformations are hard to understand so this will make more sense later, but in some cases you might want to “turn one Info into another”. Because the contents of an Info is write-once you can’t do this, so instead you have to make two Infos and link them via a Transformation object. The <code class="docutils literal notranslate"><span class="pre">info.transformations()</span></code> function allows you to ask an Info to return a list of all its Transformations. You can specify a “relationship” which can be “all”, “parent” or “child”. If you set relationship to “parent” the Info will give you only Transformations where it was turned into another Info. If you opt for “child” you’ll get only Transformations where a different Info was turned into this one. If you ask for “all” then you’ll get both of the above lists combined.</p>
+<p>The final function <code class="docutils literal notranslate"><span class="pre">_mutated_contents()</span></code> definitely won’t make any sense until we cover Transformations, so if you want to know about that function right now you should skip ahead to the Transformations page.</p>
+</div>
+<div class="section" id="kinds-of-infos">
+<h2>Kinds of Infos<a class="headerlink" href="#kinds-of-infos" title="Permalink to this headline">¶</a></h2>
+<p>Just like with the Node class, Dallinger comes with a bunch of pre-packaged Info types. You can see them in <cite>Dallinger/dallinger.info.py</cite>. If you go there now you will see four subclasses of <code class="docutils literal notranslate"><span class="pre">Info</span></code>: <code class="docutils literal notranslate"><span class="pre">Gene</span></code>, <code class="docutils literal notranslate"><span class="pre">Meme</span></code>, <code class="docutils literal notranslate"><span class="pre">State</span></code> and <code class="docutils literal notranslate"><span class="pre">TrackingEvent</span></code>. But none of these do anything different to the base class <code class="docutils literal notranslate"><span class="pre">Info</span></code> - they are just different names for the same fundamental thing. This might seem a little wasteful, but remember you can often pass the Info <code class="docutils literal notranslate"><span class="pre">type</span></code> as an argument in many functions (e.g. <code class="docutils literal notranslate"><span class="pre">node.infos()</span></code>). This applies to these types of Infos, even though they don’t have any special functions. Thus, you can freely use these types in your experiments and filter by them too, for instance using <code class="docutils literal notranslate"><span class="pre">node.infos(type=Gene)</span></code> to get a Node’s genes. We’ll see an example of this in the Rogers demo later on.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Infos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-an-info">What is an Info?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-info-table">The Info Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#info-objects">Info Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#kinds-of-infos">Kinds of Infos</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="vector.html" title="previous chapter">Vectors</a></li>
+      <li>Next: <a href="transmission.html" title="next chapter">Transmissions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/info.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

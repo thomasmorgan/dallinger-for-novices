@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Transformations &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Networks" href="network.html" />
+    <link rel="prev" title="Transmissions" href="transmission.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="transformations">
+<h1>Transformations<a class="headerlink" href="#transformations" title="Permalink to this headline">¶</a></h1>
+<p>Transformations are another type of object created by Dallinger. Just like all the other classes covered in the previous sections, they have ther own table in the database.</p>
+<div class="figure">
+<img alt="" src="_static/class_chart.jpg" />
+</div>
+<div class="section" id="what-is-a-transformation">
+<h2>What is a Transformation?<a class="headerlink" href="#what-is-a-transformation" title="Permalink to this headline">¶</a></h2>
+<p>Transformations are, without a doubt, the oddest of the base objects in Dallinger and at first glance they almost never make sense to a learner. That said, the good news is that they are also the only objects that aren’t strictly necessary. What this means is that for any experiment you want to do, the use of Transformations is entirely optional and you can acheive the same goal using just the other object types (Nodes, Vectors and so on). The reason that Transformations are nontheless a part of Dallinger is that they are, in some cases, a much more efficient way of doing something that would otherwise be a bit of a hassle. Given this, it’s probably in your interest to learn how ot use them.</p>
+<p>OK, but this doesn’t tell us what a Transformation actually is, so let’s try and figure that out now. Well, when an experiment is running, an extremely common occurence is for one Node to make an Info, send it along a Vector to another Node (i.e. for a Transmission to be made) and for the receiving Node to use that Info as the basis to make an Info of its own. This process requires only Nodes, a Vector, Infos, a Transmission and a Network (everything has to occur in a Network), which is all well and good, but what this collection of objects is lacking is some concrete statement of the fact that the second Info was made in response to the first one. Sure, you could look at the timestamps of everything and note that the second Info was made shortly after the Transmission was received. You could also look at the contents of the two Infos to see if there is any kind of similarity. But this is all vague ad-hocery. So, to reduce the ambiguity, at the same time as the second Info is being created we can create a Transformation object that serves as a note that the second Info is, in some sense, a Transformation of the first (even if the function applied to the first Info in order to make the second is inside the head of a participant).</p>
+<p>This might feel a bit like overkill, but the true glory of Transformations can be seen in larger networks. Imagine you have a whole bunch of email data and you want to monitor the spread of chain emails - emails where the email itself asks you to send the email on to others, but with a few small modifications (these were a thing in the early days of the internet). But, people receive and send a huge number of emails every day, moreover, they don’t necessarily respond to each email as soon as they get it. To track a chain email you could search emails records by subject line, looking for known chain emails, but what if the sender modifies that? In the end you’ll probably have to write some reasonably sophisticated algorithm to try to spot which outgoing emails are modified versions of received chain emails and just hope your algorithm doesn’t make too many mistakes. Transformations solve this problem: when the next iteration of the chain email is sent out, a note is made explicitly stating that this email is a Transformation of some previous email. Say you have the database from an experiment, with the Transformation table it becomes very easy to ask “See this Info here? I want to know who it was sent to and what they did with it - who those people sent it on to as well, and what they did with it too.” You can effectively reconstruct the family-tree of an Info across your whole experiment. This can, of course, be done the long way without Transformations, but Transformations just make the job of keeping track of Infos such much easier.</p>
+</div>
+<div class="section" id="the-transformation-table">
+<h2>The Transformation Table<a class="headerlink" href="#the-transformation-table" title="Permalink to this headline">¶</a></h2>
+<p>Most of the Transformation table is extremely familiar: columns inherited from <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>, as well as columns for <code class="docutils literal notranslate"><span class="pre">network</span></code> and <code class="docutils literal notranslate"><span class="pre">node</span></code> (the Node doing the transformation), but there are also unique columns called <code class="docutils literal notranslate"><span class="pre">info_in_id</span></code> and <code class="docutils literal notranslate"><span class="pre">info_out_id</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: the id of the info that was transformed.</span>
+<span class="n">info_in_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;info.id&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the info that was transformed.</span>
+<span class="n">info_in</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">foreign_keys</span><span class="o">=</span><span class="p">[</span><span class="n">info_in_id</span><span class="p">],</span>
+                       <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;transformation_applied_to&quot;</span><span class="p">)</span>
+
+<span class="c1">#: the id of the info produced by the transformation.</span>
+<span class="n">info_out_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;info.id&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the info produced by the transformation.</span>
+<span class="n">info_out</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">foreign_keys</span><span class="o">=</span><span class="p">[</span><span class="n">info_out_id</span><span class="p">],</span>
+                        <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;transformation_whence&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These give the ids of the Info that was transformed (that’s the <code class="docutils literal notranslate"><span class="pre">info_in</span></code>) and the Info that was produced by the Transformation (that’s the <code class="docutils literal notranslate"><span class="pre">info_out</span></code>). As you can see above there are also relationships that you can use to get the Info objects themselves, as opposed to just their ids.</p>
+</div>
+<div class="section" id="transformation-objects">
+<h2>Transformation Objects<a class="headerlink" href="#transformation-objects" title="Permalink to this headline">¶</a></h2>
+<p>Transformations don’t have any unique functions beyond what we have already seen (they do have <code class="docutils literal notranslate"><span class="pre">__repr__</span></code>, <code class="docutils literal notranslate"><span class="pre">__json__</span></code> etc., but you should be familiar with those). This is because Transformations don’t actually do things, they simply exist and serve as a record of relationships between Infos. It is a similar state of affairs in the <code class="docutils literal notranslate"><span class="pre">Vector</span></code> class - Vectors don’t really do much, they just exist and serve as a record of a relationship between two Nodes. All this said though, the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function of the Transformation class does do a couple of interesting things so we might as well give it a look:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_in</span><span class="p">,</span> <span class="n">info_out</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a transformation.&quot;&quot;&quot;</span>
+    <span class="c1"># check info_in is from the same node as info_out</span>
+    <span class="c1"># or has been sent to the same node</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">info_in</span><span class="o">.</span><span class="n">origin_id</span> <span class="o">!=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">origin_id</span> <span class="ow">and</span>
+        <span class="n">info_in</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">info_id</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">info_out</span><span class="o">.</span><span class="n">origin</span><span class="o">.</span><span class="n">transmissions</span><span class="p">(</span>
+                <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;incoming&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;received&quot;</span><span class="p">)]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Cannot transform </span><span class="si">{}</span><span class="s2"> into </span><span class="si">{}</span><span class="s2"> as they are not at the same node.&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">info_in</span><span class="p">,</span> <span class="n">info_out</span><span class="p">))</span>
+
+    <span class="c1"># check info_in/out are not failed</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">info_in</span><span class="p">,</span> <span class="n">info_out</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot transform </span><span class="si">{}</span><span class="s2"> as it has failed&quot;</span>
+                             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">info_in</span> <span class="o">=</span> <span class="n">info_in</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info_out</span> <span class="o">=</span> <span class="n">info_out</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">node</span> <span class="o">=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">origin</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">network</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info_in_id</span> <span class="o">=</span> <span class="n">info_in</span><span class="o">.</span><span class="n">id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">info_out_id</span> <span class="o">=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">node_id</span> <span class="o">=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">origin_id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">network_id</span> <span class="o">=</span> <span class="n">info_out</span><span class="o">.</span><span class="n">network_id</span>
+</pre></div>
+</div>
+<p>Remember that the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function runs whenever you are making a Transformation, and so it basically has two functions: (1) to make sure that the Infos you are trying to link via a transformation are linkable in this way, and (2) to help you fill out the columns in the table.</p>
+<p>The function requires two Infos be provided by the user - the <code class="docutils literal notranslate"><span class="pre">info_in</span></code> and the <code class="docutils literal notranslate"><span class="pre">info_out</span></code>. The first thing it does is check that it is plausible that the <code class="docutils literal notranslate"><span class="pre">info_out</span></code> could be a transformation of the <code class="docutils literal notranslate"><span class="pre">info_in</span></code>. For this to be the case a single Node must have access to both of them because it is the Node that does the transforming. This requirement could be satisfied in two ways: (1) a single Node has made both Infos, or (2) the Node that made the <code class="docutils literal notranslate"><span class="pre">info_out</span></code> has been sent the <code class="docutils literal notranslate"><span class="pre">info_in</span></code> via a Transmission from another Node. The function checks that one of these is true, and if they aren’t it raises an error and your experiment will break.</p>
+<p>After that it does a quick check to make sure neither of the Infos are failed, and will raise an error if either one or both of them are failed.</p>
+<p>Finally, now that the function is happy that the Transformation is legit, it fills out the columns in the database, note that the <code class="docutils literal notranslate"><span class="pre">node_id</span></code> and <code class="docutils literal notranslate"><span class="pre">network_id</span></code> of the Transformation is the same as that of the <code class="docutils literal notranslate"><span class="pre">info_out</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transformations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-transformation">What is a Transformation?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-transformation-table">The Transformation Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transformation-objects">Transformation Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="transmission.html" title="previous chapter">Transmissions</a></li>
+      <li>Next: <a href="network.html" title="next chapter">Networks</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/transformation.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

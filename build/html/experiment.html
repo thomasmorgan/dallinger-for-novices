@@ -1,0 +1,459 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>The Experiment Class &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="the-experiment-class">
+<h1>The Experiment Class<a class="headerlink" href="#the-experiment-class" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Experiment</span></code> is a class, and so it is a kind of object that is created by Dallinger. However, unlike all the classes covered previously, it does not have an associated table in the database. Instead, the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class can be thought of as a set of instructions that dictate what happens to the database as the experiment runs, so rather than being <em>in</em> the database, the Experiment <em>manages</em> the database.</p>
+<p>In what follows we’ll go through the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class in detail. On its own it doesn’t do anything, it’s a hollow shell of an experiment waiting to be filled with specifics. Nonetheless, all created experiments are built off this, so in order to make your own Experiment you’ll need to know what Experiments are capable of.</p>
+<p>You’ll probably also find yourself saying “well I can see what these functions do, but who is calling them?”. If so, that’s great and we’ll come to your question in a few chapters.</p>
+<p>To get started you should open the file <cite>experiment.py</cite> inside <cite>Dallinger/dallinger</cite>.</p>
+<div class="section" id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h2>
+<p>The first thing you’ll see is that the file imports lots and lots of things. By and large you don’t need to worry about these, but a couple of them are worth commenting on in passing. For instance</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+</pre></div>
+</div>
+<p>presumably imports something that is used to log important information to the server logs when the Experiment runs.</p>
+<p>There’s also a bunch of imports to do with <code class="docutils literal notranslate"><span class="pre">sqlalchemy</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">and_</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">func</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">sessionmaker</span><span class="p">,</span> <span class="n">scoped_session</span>
+</pre></div>
+</div>
+<p>These imports will be used by the Experiment when accessing the database. You won’t need to worry about them at all, but it’s good to know they’re there.</p>
+<p>Finally, you can see a lot of imports that start with <code class="docutils literal notranslate"><span class="pre">dallinger</span></code>. These imports correspond to the Experiment loading in the other parts of Dallinger. If you look closely you can even see the Experiment loading some of the classes we have already covered:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dallinger.models</span> <span class="k">import</span> <span class="n">Network</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">Info</span><span class="p">,</span> <span class="n">Transformation</span><span class="p">,</span> <span class="n">Participant</span>
+<span class="kn">from</span> <span class="nn">dallinger.information</span> <span class="k">import</span> <span class="n">Gene</span><span class="p">,</span> <span class="n">Meme</span><span class="p">,</span> <span class="n">State</span>
+<span class="kn">from</span> <span class="nn">dallinger.nodes</span> <span class="k">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">Source</span><span class="p">,</span> <span class="n">Environment</span>
+<span class="kn">from</span> <span class="nn">dallinger.transformations</span> <span class="k">import</span> <span class="n">Compression</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">dallinger.transformations</span> <span class="k">import</span> <span class="n">Mutation</span><span class="p">,</span> <span class="n">Replication</span>
+<span class="kn">from</span> <span class="nn">dallinger.networks</span> <span class="k">import</span> <span class="n">Empty</span>
+</pre></div>
+</div>
+<p>Without these import statements the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class simply wouldn’t know what these things are, and so it wouldn’t be able to dictate what to do with the database.</p>
+</div>
+<div class="section" id="init">
+<h2>__init__<a class="headerlink" href="#init" title="Permalink to this headline">¶</a></h2>
+<p>There was a point in time, probably early 2016, when I more-or-less understood every line code in Dallinger (or <cite>Wallace</cite> as it was then known). Fortunately, since then we have been able to work with developers far more skilled than myself who have tremendously improved the code. The only downside being that I no longer have a detailed understanding of what some bits of the code are doing. This is the case with the function called <code class="docutils literal notranslate"><span class="pre">exp_class_working_dir</span></code> that immediately follows the imports. I can hazard a guess that it has something to do with loading the config file of the experiment (more on that later), but after that my understanding gets very hazy. Fortunately, I know enough to suspect that you won’t need to know how it works either, so for now let’s skip over it down to the <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function a few lines below.</p>
+<p>As we briefly covered in the chapter on Nodes, <code class="docutils literal notranslate"><span class="pre">__init__</span></code> is a special function in python that tells you how to make an object. So the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function of the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class contains the instructions for making a Node, and the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function of the <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class contains the instructions for how to make an Experiment.</p>
+<p>The first part of <code class="docutils literal notranslate"><span class="pre">__init__</span></code> simply sets a number of variables, for instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: String, the name of the experiment. Default is &quot;Experiment</span>
+<span class="c1">#: title&quot;.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="s2">&quot;Experiment title&quot;</span>
+</pre></div>
+</div>
+<p>The comments associated with most of these are self explanatory, but we’ll cover a couple of them in a little more detail:</p>
+<p><code class="docutils literal notranslate"><span class="pre">practice_repeats</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment_repeats</span></code>. Recall in the section on Networks that each Network has a <cite>role</cite> which is a String that defaults to “experiment” but can take any value and is useful when you have different experimental conditions. We also mentioned that in addition to “experiment” being the default role, Dallinger also recognizes the role “practice” and we’ll see shortly how these values affect what Dallinger does. The variables <code class="docutils literal notranslate"><span class="pre">practice_repeats</span></code> and <code class="docutils literal notranslate"><span class="pre">experiment_repeats</span></code> are used to tell Dallinger how many of each kind of Network you want. So if you want a total of 10 Networks, but the first two should be practice Networks you should set <code class="docutils literal notranslate"><span class="pre">experiment_repeats</span></code> to 8 and <code class="docutils literal notranslate"><span class="pre">practice_repeats</span></code> to 2. We’ll cover what to do if you want custom roles later on.</p>
+<p><code class="docutils literal notranslate"><span class="pre">quorum</span></code> is used to tell Dallinger how many participants need to have signed up before the experiment can start. We’ll cover this in more detail much later on in this guide.</p>
+<p><code class="docutils literal notranslate"><span class="pre">initial_recruitment_size</span></code> tells Dallinger how many participants to recruit at the start of the experiment. Minimally you want this to be 1. But if you want to have participants taking part in groups of 10 and you want, say, 5 groups to operate in parallel, you’ll want to set this to 50. After this initial recruitment, further participant recruitment is handled by the <code class="docutils literal notranslate"><span class="pre">recruit()</span></code> function which we’ll cover below.</p>
+<p><code class="docutils literal notranslate"><span class="pre">known_classes</span></code> is complicated. First, let’s just look at what it is: it’s a <cite>dictionary</cite>, which is a kind of python object that allows you to store and retrieve values by name. In this case, it stores a bunch of different classes (e.g. <code class="docutils literal notranslate"><span class="pre">Agent</span></code>) and labels them with their String names (e.g. “Agent”). This means you can get the classes from the dictionary if you know their names, so you can, for example do this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">agent_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_classes</span><span class="p">[</span><span class="s2">&quot;Agent&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>and your variable, <code class="docutils literal notranslate"><span class="pre">agent_class</span></code>, will now store the <code class="docutils literal notranslate"><span class="pre">Agent</span></code> class itself. But why would you want to do this? Let’s explain.</p>
+<p>When an experiment is running, the server is on one computer (somewhere in the cloud) while participants are taking part on their own machines. This involves a steady stream of communication between the two. For instance, participants’ machines will request the various kinds of things needed to be displayed on the screen (and we’ll see how that’s done later on). In addition to requesting information, participants are sending information back to the server. For instance, say your experiment shows participants three lines and asks them which is the longest. When a participant responds, at first their decision is known only to their machine and must be communicated back to the server. This is quite straightforward (we’ll see how to do it later), but it’s important to remember that all information must be sent as a String.</p>
+<p>But it’s not enough to just send this to the server, because the server needs to know what you want it do with this information. Chances are you want to have it saved as an Info (if you’re not sure why probably a good idea to go re-read the section on Infos). If the server were a person, you might say something like: “Hello server, Participant 5, who is currently associated with Node 20, has just chosen line 3 as the longest. Please create a new Info and save the number 3 as its contents”. Fortunately (or, rather, by design) Dallinger has a system for doing exactly this and we’ll cover it in detail in the section on routes. However, note that the message must be sent to the server as a String, but that at some point the server must turn that message into executable code, i.e. the String “Info” will need to be turned into the class <code class="docutils literal notranslate"><span class="pre">Info</span></code>. You might now see why we have the dictionary: this is exactly what it does, it’s a way to take a String and turn it into the Class of the same name. Problem solved!</p>
+<p>There are a couple of wrinkles to the story we’ll go over now though. First, isn’t the dictionary a bit clunky? Doesn’t python have a nicer way to read a String as code? The answer is yes, it does. In fact the function <code class="docutils literal notranslate"><span class="pre">exec()</span></code> does exactly this. We don’t use exec though as it places no constraints on what the participants machine might ask for which leaves your code very open to exploits. Here’s an example using plain English. Let’s go back to our previous example:</p>
+<blockquote>
+<div>“Hello server, Participant 5, who is currently associated with Node 20, has just chosen line 3 as the longest. Please create a new Info and save the number 3 as its contents”</div></blockquote>
+<p>Now, what the experimenter has access to is really something more like this:</p>
+<blockquote>
+<div>“Hello server, Participant 5, who is currently associated with Node 20, has just chosen line 3 as the longest. Please create a new &lt;insert class here&gt; and save the number 3 as its contents”</div></blockquote>
+<p>So the experimenter can set the Experiment up in such a way to request a specific class. Now imagine, if instead of putting something sensible like “Info” there, you put “Info and save the number 3 as its contents. After that please delete all the data in my database.”. This would give you:</p>
+<blockquote>
+<div>“Hello server, Participant 5, who is currently associated with Node 20, has just chosen line 3 as the longest. Please create a new Info and save the number 3 as its contents. After that please delete all the data in my database. and save the number 3 as its contents”</div></blockquote>
+<p>The function <code class="docutils literal notranslate"><span class="pre">exec</span></code> tells the server to do exactly as it’s told, regardless of what it says, and so in this case it would happily delete all your data before getting to the final part of the instructions where it would probably crash. Hopefully the experimenter would never set their experiment up to do something so foolish, but the experimenter is not the problem: anyone on the front end who is sufficiently determined can send any request back to the server (this is what the console does in your browser). So even if you set up your requests to do only sensible things, a participant can send malicious requests too. By using the dictionary instead of <code class="docutils literal notranslate"><span class="pre">exec()</span></code> we make sure that only certain allowed values will be accepted. “Info” is in the dictionary, so that’s ok, but “Info and save the number 3 as its contents. After that please delete all the data in my database.” is not, and so if this were sent as part of a request the server would reject it before deleting any of your data. This might feel like overkill, and certainly participants with this motivation are rare, but it has happened. Early on in Dallinger development a participant with the id “Ayyyy lmao” turned up in our database which caused havoc with the experiment. Dallinger is now robust to these kinds of pranks (“attacks” is probably too strong), thanks to safety measures like the <code class="docutils literal notranslate"><span class="pre">known_classes</span></code> dictionary.</p>
+<p>OK, so I said there were two wrinkles, so what’s the other one? Well remember that in creating your experiment you are not limited to the base classes and you are free to make your own. We will see many examples of this in the demos. So let’s say you make a new kind of Info called a <code class="docutils literal notranslate"><span class="pre">Decision</span></code>. It’s just like Dallinger’s <code class="docutils literal notranslate"><span class="pre">Info</span></code> class, but it contains a Node’s final decision on a given trial as opposed to its initial decisions. What happens when you ask the server to make a new object of type <code class="docutils literal notranslate"><span class="pre">Decision</span></code>? Well, it will look it up in the dictionary of <code class="docutils literal notranslate"><span class="pre">known_classes</span></code> and will reject your request because “Decision” is not in there. So, the second wrinkle is this: if your experiment uses new classes that base Dallinger is not aware of, you will need to add them to the <code class="docutils literal notranslate"><span class="pre">known_classes</span></code> dictionary before participants can ask the server to make them. Fortunately this is very straightforward and we’ll see examples of it in the demos.</p>
+</div>
+<div class="section" id="setup">
+<h2>setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>OK, let’s skip the next few functions as they are not critical for you to understand (and I only half get them) and head to the setup function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the networks if they don&#39;t already exist.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span><span class="p">):</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_network</span><span class="p">()</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s2">&quot;practice&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">):</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_network</span><span class="p">()</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s2">&quot;experiment&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This function creates the Networks that the experiment will need. We can go through it line by line. First it checks that the Networks don’t already exist:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">():</span>
+</pre></div>
+</div>
+<p>The function <code class="docutils literal notranslate"><span class="pre">networks()</span></code> can be seen just below. It is very similar to many of the functions we saw in previous chapters. For instance, <code class="docutils literal notranslate"><span class="pre">Node</span></code> has the function <code class="docutils literal notranslate"><span class="pre">infos()</span></code> to get the Infos created by a Node. In the same way <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> has the function <code class="docutils literal notranslate"><span class="pre">networks()</span></code> to get the Networks created by the Experiment. You can filter by the role of the Network (note that “all” means all networks, not “networks with the role ‘all’”, so best not to use “all” as a role for your networks!). You can also filter by <cite>full</cite> - i.e. whether or not the network is already full.</p>
+<p>You might be wondering why this check needs to be carried out at all. After all, shouldn’t this function (like <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>) only be executed once when the Experiment is first created? If you are asking this question you have a good intuition, but one that is failing you in this case. It turns out that the Experiment doesn’t continually exist on the server. Rather, only the database continually exists and everytime a new request from a participant comes in the experiment is created from scratch, but reading in the current state of the database. At the end of each request the experiment goes back to sleep, waiting to be rebuilt the next time a request comes in. This might seem odd, but it’s the standard practice for web apps. It’s basically a way of making sure the Experiment is always tied to the database and so it stops strange issues arising when the Experiment doesn’t check the database for so long that it starts getting things wrong. A side effect of this is though that everytime a new request comes in, effectively a new Experiment is created and so the <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> and <code class="docutils literal notranslate"><span class="pre">setup()</span></code> functions are called again. Because of this the <code class="docutils literal notranslate"><span class="pre">setup()</span></code> function must check the database to see if networks have already been made before it makes some new ones. Hence we have this check.</p>
+<p>After the check, it makes the networks. But remember that there are different kinds of Networks (<code class="docutils literal notranslate"><span class="pre">Chain</span></code>, <code class="docutils literal notranslate"><span class="pre">DiscreteGenerational</span></code>) and so on, so what kind of Network should the Experiment make? The answer is given by the function <code class="docutils literal notranslate"><span class="pre">create_network()</span></code> which is immediately below <code class="docutils literal notranslate"><span class="pre">setup()</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_network</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a new network.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Empty</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The function <code class="docutils literal notranslate"><span class="pre">setup()</span></code> delegates actual Network creation to this function, which by default returns an Empty Network. Because most experiments do not want an Empty Network you will see that most of the demos overwrite this function to return a different class of Network. Because it’s a function you could even do something fancy, like have the first 5 Networks be Chains, the next 5 be Stars and the rest be Empty. That would look like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a new network.&quot;&quot;&quot;</span>
+    <span class="n">num_nets</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">num_nets</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Chain</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">num_nets</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Star</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">Empty</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>I’m not sure why you would want to do this, but the functionality is there should you need it.</p>
+<p>Once <code class="docutils literal notranslate"><span class="pre">create_network()</span></code> creates a network it is sent back to <code class="docutils literal notranslate"><span class="pre">setup()</span></code> which updates its role. Specifically, first <cite>n</cite> networks (where n is <code class="docutils literal notranslate"><span class="pre">practice_repeats</span></code>) it gives them the role “practice” and after that it gives them the role “experiment” with the total number of networks being <code class="docutils literal notranslate"><span class="pre">practice_repeats</span> <span class="pre">+</span> <span class="pre">experiment_repeats</span></code>.</p>
+</div>
+<div class="section" id="get-network-for-participant">
+<h2>get_network_for_participant<a class="headerlink" href="#get-network-for-participant" title="Permalink to this headline">¶</a></h2>
+<p>The next function we’ll look at is <code class="docutils literal notranslate"><span class="pre">get_network_for_participant()</span></code> which is found just a few lines lower in the same file. At first glace this function looks big and complicated, but in terms of what it does it’s pretty straightforward.</p>
+<p>When a participant chooses to take part in an experiment, they are first asked to give consent and so on (more on this in later chapters), but before they can take part in the actual experiment, they need to be assigned to a Node. Or, perhaps more accurately, a Node needs to be created for them to take part as. We’ll see how this Node is made shortly, but before the Node can be made we need to know what Network it will go in. Remember that Nodes cannot exist outside of Networks and so before we even get started on Node creation we need to have identified what Network the Node will go in. (To see why in more detail go back and look at the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function of the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class - it requires that a network be given to it in order to do its work).</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">get_network_for_participant()</span></code> then decides which Network the Participant’s Node will go in. The comment at the top of the function explains how a target Network is determined:</p>
+<blockquote>
+<div>If no networks are available, None will be returned. By default
+participants can participate only once in each network and participants
+first complete networks with <cite>role=”practice”</cite> before doing all other
+networks in a random order.</div></blockquote>
+<p>OK, so let’s see how this pans out in the code. First the function gets the Participant’s id, and gets a list of all Networks that are not already full:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">id</span>
+<span class="n">networks_with_space</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
+    <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Network</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If you are paying close attenion you might be wondering why the 2nd line looks odd, and in particular, why it doesn’t use the <code class="docutils literal notranslate"><span class="pre">networks()</span></code> function we’ve already discussed. Chances are it’s because this function was written before <code class="docutils literal notranslate"><span class="pre">networks()</span></code> existed and so the search query is written in sqlalchemy (the library that Dallinger uses to access the database). If you go back up and look at <code class="docutils literal notranslate"><span class="pre">networks()</span></code> you’ll see that it’s basically a slightly nicer wrapper for the same thing. So, the query could be rewritten as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networks_with_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">(</span><span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>except (!) the original code also orders the networks by their id (so the list is always in the same order). Our alternative code does not guarantee this. You can do it in python though, something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networks_with_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">(</span><span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">attrgetter</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>(note I have not tested this, and you’d also need to import attrgetter with <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">operator</span> <span class="pre">import</span> <span class="pre">attrgetter</span></code>).</p>
+<p>Anyway, back to the function, which now additionally gets a list of all the Networks the Participant has already taken part in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">networks_participated_in</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">network_id</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span>
+    <span class="n">Node</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_entities</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">network_id</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">participant_id</span><span class="o">=</span><span class="n">participant</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Note that while <cite>networks_with_space</cite> is a list of the actual network objects, <cite>networks_participated_in</cite> is just a list of network ids scraped from all the nodes of the participant. Again, this bit of code is quite old, and could probably be written more cleanly as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">networks_participated_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">network_id</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">participant</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>This highlights that we are counting both failed and unfailed nodes here: just because a participant has failed in a network we don’t want to let them back in (at least not by default).</p>
+<p>Next, the function combines these two lists to generate a list of Networks the Participant is allowed in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">legal_networks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">net</span> <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">networks_with_space</span>
+    <span class="k">if</span> <span class="n">net</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">networks_participated_in</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>If this list ends up being empty that means the Participant has nowhere to go and so we return <cite>None</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">legal_networks</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;No networks available, returning None&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Note that this bit of code includes a <code class="docutils literal notranslate"><span class="pre">log</span></code> statement. If you are running Dallinger locally (i.e. in debug mode) this will be printed in your terminal. If Dallinger is in live or sandbox mode, it will be printed to the server logs. Either way, it will help you keep track of what’s going on.</p>
+<p>If networks are available to this participant, a quick statement is printed to let you know:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> networks out of </span><span class="si">{}</span><span class="s2"> available&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">),</span>
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">)),</span>
+         <span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and a sublist of Networks with a role of “practice” is made:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">legal_practice_networks</span> <span class="o">=</span> <span class="p">[</span><span class="n">net</span> <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">legal_networks</span>
+                           <span class="k">if</span> <span class="n">net</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;practice&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>If there are practice Networks available (i.e. this sublist is not empty) it chooses the first one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">legal_practice_networks</span><span class="p">:</span>
+    <span class="n">chosen_network</span> <span class="o">=</span> <span class="n">legal_practice_networks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Practice networks available.&quot;</span>
+             <span class="s2">&quot;Assigning participant to practice network </span><span class="si">{}</span><span class="s2">.&quot;</span>
+             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chosen_network</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>otherwise it chooses a randomly selected Network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">else</span><span class="p">:</span>
+    <span class="n">chosen_network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_network</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">,</span> <span class="n">participant</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;No practice networks available.&quot;</span>
+             <span class="s2">&quot;Assigning participant to experiment network </span><span class="si">{}</span><span class="s2">&quot;</span>
+             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chosen_network</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where the function <code class="docutils literal notranslate"><span class="pre">choose_network()</span></code> is listed immediately below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">choose_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">networks</span><span class="p">,</span> <span class="n">participant</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">networks</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally it returns the chosen Network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">chosen_network</span>
+</pre></div>
+</div>
+<p>Function over! It might be worth going back and re-reading the comment at the top of the function and going through it again to see how it does what we want.</p>
+<p>You might not want this behavior though, and users are free to overwrite this function on an experiment by experiment basis. I don’t think any of the demos currently do this, but they do overwrite other functions so you’ll get a general sense of whats possible, but here are some examples:</p>
+<p>Put each Participant in each Network once, but in a random order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">id</span>
+<span class="n">networks_with_space</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
+    <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Network</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="n">networks_participated_in</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">network_id</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span>
+    <span class="n">Node</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_entities</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">network_id</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">participant_id</span><span class="o">=</span><span class="n">participant</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="p">]</span>
+
+<span class="n">legal_networks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">net</span> <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">networks_with_space</span>
+    <span class="k">if</span> <span class="n">net</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">networks_participated_in</span>
+<span class="p">]</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">legal_networks</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;No networks available, returning None&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> networks out of </span><span class="si">{}</span><span class="s2"> available&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">),</span>
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">)),</span>
+         <span class="n">key</span><span class="p">)</span>
+
+<span class="n">chosen_network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_network</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">,</span> <span class="n">participant</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Networks available.&quot;</span>
+         <span class="s2">&quot;Assigning participant to network </span><span class="si">{}</span><span class="s2">&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chosen_network</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">chosen_network</span>
+</pre></div>
+</div>
+<p>Put each Participant in each Network once in order of Network id:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">id</span>
+<span class="n">networks_with_space</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
+    <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Network</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="n">networks_participated_in</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">network_id</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span>
+    <span class="n">Node</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_entities</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">network_id</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">participant_id</span><span class="o">=</span><span class="n">participant</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="p">]</span>
+
+<span class="n">legal_networks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">net</span> <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="n">networks_with_space</span>
+    <span class="k">if</span> <span class="n">net</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">networks_participated_in</span>
+<span class="p">]</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">legal_networks</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;No networks available, returning None&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> networks out of </span><span class="si">{}</span><span class="s2"> available&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">),</span>
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">)),</span>
+         <span class="n">key</span><span class="p">)</span>
+
+<span class="n">chosen_network</span> <span class="o">=</span> <span class="n">legal_networks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Networks available.&quot;</span>
+         <span class="s2">&quot;Assigning participant to practice network </span><span class="si">{}</span><span class="s2">.&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chosen_network</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">chosen_network</span>
+</pre></div>
+</div>
+<p>Put a Participant in a single, randomly selected Network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">key</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">id</span>
+<span class="n">networks_participated_in</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">network_id</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span>
+    <span class="n">Node</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">with_entities</span><span class="p">(</span><span class="n">Node</span><span class="o">.</span><span class="n">network_id</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">participant_id</span><span class="o">=</span><span class="n">participant</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="p">]</span>
+
+<span class="k">if</span> <span class="n">networks_participated_in</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="n">networks_with_space</span> <span class="o">=</span> <span class="n">Network</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span>
+<span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">Network</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+<span class="n">legal_networks</span> <span class="o">=</span> <span class="n">networks_with_space</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">legal_networks</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;No networks available, returning None&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> networks out of </span><span class="si">{}</span><span class="s2"> available&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">),</span>
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">)),</span>
+         <span class="n">key</span><span class="p">)</span>
+
+<span class="n">chosen_network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_network</span><span class="p">(</span><span class="n">legal_networks</span><span class="p">,</span> <span class="n">participant</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Networks available.&quot;</span>
+         <span class="s2">&quot;Assigning participant to network </span><span class="si">{}</span><span class="s2">&quot;</span>
+         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chosen_network</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">chosen_network</span>
+</pre></div>
+</div>
+<p>And so on, hopefully you get some idea of what is possible.</p>
+</div>
+<div class="section" id="data-check-submission-successful">
+<h2>data_check -&gt; submission_successful<a class="headerlink" href="#data-check-submission-successful" title="Permalink to this headline">¶</a></h2>
+<p>We now come to a series of functions that have reasonably detailed comments, but nothing in the way of actual code. This is because these functions are always going to be experiments specific and so they have only very basic default behavior. We’ll see more detail about them in the demos, but here I’ll just give a little more info about how they work.</p>
+<p><code class="docutils literal notranslate"><span class="pre">data_check()</span></code> is called once for each participant when that participant finishes. It is a way to check a Participant’s data automatically as the experiment is running. Let’s say you are running a transmission chain in which the first participant is told a story and has to remember it 3 minutes later. Whatever they remember is sent to the 2nd participant, who has to then remember it themselves, and so on. But let’s say you also want to make sure they don’t type in any bad language. The manual way to do this is to pause the experiment every time a participant finishes, check the participant’s responses yourself and re-start the experiment if everything is ok. This would be painfully slow, however. Fortunately, <code class="docutils literal notranslate"><span class="pre">data_check()</span></code> can automate this. Even nicer, if a participant fails the data check their data is automatically deleted and a replacement participant is recruited. Here’s an example function that checks a participant’s response for certain bad words:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">data_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">participant</span><span class="p">):</span>
+        <span class="n">ppt_node</span> <span class="o">=</span> <span class="n">participants</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ppt_node</span><span class="o">.</span><span class="n">infos</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span>
+
+        <span class="n">bad_words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;s-word&quot;</span><span class="p">,</span> <span class="s2">&quot;f-word&quot;</span><span class="p">,</span> <span class="s2">&quot;n-word&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">bad_words</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">bonus()</span></code> is called once for each participant when that participant finishes. It calculates how much of a bonus they are due, which by deafult is 0. Let’s say a participant completes 20 questions, and for each question you store whether they got it right as <cite>property3</cite> of a corresponding Info (with right=1, wrong=0). Their bonus is up to $3 and is proportional to how many questions they got right:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">bonus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">participant</span><span class="p">):</span>
+        <span class="n">ppt_node</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">nodes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">ppt_node</span><span class="o">.</span><span class="n">infos</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">Question</span><span class="p">)</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">property3</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">]</span>
+
+        <span class="n">average</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+
+        <span class="n">bonus</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">average</span><span class="o">*</span><span class="mf">3.0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bonus</span>
+</pre></div>
+</div>
+<p>Note the following:</p>
+<ol class="arabic simple">
+<li>We need to use <cite>int</cite> to turn property3 from a String to a number.</li>
+<li>We need to use <cite>float</cite> when calculating the average to avoid rounding issues; in python 3/7 = 0, while 3/7.0 = 0.43.</li>
+</ol>
+<p>Be careful when calculating the bonus - MTurk will let you pay a bonus up to several million dollars! Now you probably don’t have that much in your MTurk account anyway, but MTurk <em>will</em> let you empty it all on a single bonus payment, so be careful!</p>
+<p>When participants get their bonus they are also sent an email by MTurk letting them know, and the contents of this email is determined by the function <code class="docutils literal notranslate"><span class="pre">bonus_reason()</span></code>. Most experiments don’t change this, but if you want to change it you can overwrite this function.</p>
+<p><code class="docutils literal notranslate"><span class="pre">attention_check()</span></code> is in some ways very similar to <code class="docutils literal notranslate"><span class="pre">data_check()</span></code>, but it’s looking for a different thing. <code class="docutils literal notranslate"><span class="pre">data_check()</span></code> looks to make sure the data is in the correct format - sometimes participants end up missing questions, or getting too many Nodes, and so on. However, othertimes participants just pay no attention and mash their way through the experiment, this is what the <code class="docutils literal notranslate"><span class="pre">attention_check()</span></code> looks for. Either way, failing the data check or the attention check has pretty similar consequences: the participant’s data is deleted and a replacement participant is recruited. The differences are as follows:</p>
+<ol class="arabic simple">
+<li>The data check runs before the attention check, and if the data check is failed the attention check isn’t run at all.</li>
+<li>A Participant that fails the data check is given the status <cite>bad_data</cite>, while a participant that fails the attention check is given the status <cite>did_not_attend</cite>. This can helps you figure out what’s going wrong by quickly looking at the database. Note that a participant that would fail both checks will get the status <cite>bad_data</cite> because of point 1.</li>
+<li>A Participant that fails the data check will not get a bonus, this is because Dallinger cannot be sure that letting the bonus function run will even work (for instance, in the function above, what would happen if the participant didn’t even have a Node?) and so it skips it. However, a Participant that fails the attention check is assumed to have acceptable data and so will still get a bonus.</li>
+</ol>
+<p><code class="docutils literal notranslate"><span class="pre">submission_successful()</span></code> is the second last thing to run when a participant successfully completes the experiment (i.e. they have passed both the attention check and data check, and been paid a bonus). By default it does nothing, but it’s here so you can add things to the Participant processing routine if you want to.</p>
+</div>
+<div class="section" id="recruit">
+<h2>recruit<a class="headerlink" href="#recruit" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">recruit()</span></code> is run immediately after <code class="docutils literal notranslate"><span class="pre">submission_successful()</span></code> and as its name suggests it is involved in recruiting additional participants. Remember that it only runs if the Participant successfully passes the attention and data check (if either of these are failed then a replacement participant is automatically recruited). By default it does nothing but check to see if the Networks are already full and if they are, it closes recruitment.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">(</span><span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;All networks full: closing recruitment&quot;</span><span class="p">,</span> <span class="s2">&quot;-----&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">recruiter</span><span class="o">.</span><span class="n">close_recruitment</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>However, almost all experiment overwrite this because otherwise you will only ever get the number of participants specified by <cite>initial_recruitment_size</cite>. Here, for instance, is the version of recruit from the Bartlett demo that recruits participants one at a time until the chain is full:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">recruit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recruit one participant at a time until all networks are full.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">(</span><span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recruiter</span><span class="o">.</span><span class="n">recruit</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recruiter</span><span class="o">.</span><span class="n">close_recruitment</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You’ll notice that both these functions communicate with something called the <cite>recruiter</cite> and we’ll cover this in more detail later on, but for now you can think of it as an object that manages communication between Dallinger and whatever recruitment service the experiment is using (e.g. MTurk).</p>
+</div>
+<div class="section" id="bots">
+<h2>Bots<a class="headerlink" href="#bots" title="Permalink to this headline">¶</a></h2>
+<p>The final part of <cite>experiment.py</cite> creates a new class called <code class="docutils literal notranslate"><span class="pre">Bot</span></code>. This class is involved with having bots take part in your study in place of (or alongside) human participants. This is out of scope for this chapter though, so we’ll return to it later on.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/experiment.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

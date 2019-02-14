@@ -1,0 +1,151 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Participants &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Questions" href="question.html" />
+    <link rel="prev" title="Networks" href="network.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="participants">
+<h1>Participants<a class="headerlink" href="#participants" title="Permalink to this headline">¶</a></h1>
+<p>Participants are yet another kind of object created by Dallinger and, as with the others, there is a corresponding table for them in the database (only one more to go after this - almost there!). If you look at the diagram below you will see that Participants stand somewhat alone from many of the other classes. They potentially have a relationship with Nodes, but they exist outside of any Networks which might seem counterintuitive. They also have a relationship with the as yet undiscussed <code class="docutils literal notranslate"><span class="pre">Question</span></code> class. The following will hopefully make sense of all of this though.</p>
+<div class="figure">
+<img alt="" src="_static/class_chart.jpg" />
+</div>
+<div class="section" id="what-is-a-participant">
+<h2>What is a Participant?<a class="headerlink" href="#what-is-a-participant" title="Permalink to this headline">¶</a></h2>
+<p>Unlike many of the other objects, Participants have a pretty straight forward interpretation: each entry in the Participant table corresponds to a single individual who takes part in the experiment.</p>
+<p>So far so good, but you might be wondering why we have both Participants and Nodes - after all, don’t participants take part in the study as Nodes? The answer is yes, they do, but recall from the section on Networks that an experiment can involve multiple Networks and a single human participant can take part in multiple Networks. Even though participants are assigned Nodes when they interact with a Network, each Node exists only within a single Network and so for the participant to take part in multiple Networks they need a new Node for each Network (they can even have multiple Nodes in each Network if you want). This means there must be some sort of system by which a participants multiple nodes can be identified and grouped together. This is acheived by those Nodes having a relationship with a Participant object (recall that the Node table has a <code class="docutils literal notranslate"><span class="pre">participant_id</span></code> column).</p>
+<p>It’s not just this though. Once a bunch of Nodes are linked to the Participant, any of their shared details that result from them being associated with this Participant are better off stored in the Participant table than in the Node table, and so the Participant table ends up containing a lot of useful information. Let’s take a look.</p>
+</div>
+<div class="section" id="the-participant-table">
+<h2>The Participant Table<a class="headerlink" href="#the-participant-table" title="Permalink to this headline">¶</a></h2>
+<p>Participants inherit the columns added by <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>, but they have a lot of other columns too. Most of these (e.g. <code class="docutils literal notranslate"><span class="pre">fingerprint_hash</span></code> and <code class="docutils literal notranslate"><span class="pre">worker_id</span></code>) are used in participant identification with external services. For instance, when we recruit participants from Mechanical Turk they are sent to Dallinger with a bunch of details of their MTurk account. We need to store these details such that when the participant is finished with the study we can get back in touch with MTurk and let them know precisely which Turk worker has finished our study and how much to pay them etc.</p>
+<p>There’s also a <code class="docutils literal notranslate"><span class="pre">mode</span></code> column that stores the mode in which Dallinger was running when the participant was recruited (either debug, sandbox or live, see Part 1 for more details).</p>
+<p>There are also columns to record how much the Participant was paid, both as a base payment and as a bonus.</p>
+<p>The last column, <code class="docutils literal notranslate"><span class="pre">status</span></code>, is the most complicated, but also probably the most important. It records what that participant is currently doing (as far as Dallinger can tell). here are the possible values and what they mean:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">working</span></code> - this is the default value assigned when a Participant joins the study. It stays like this until something happens that causes it to be changed. As such <cite>working</cite> is not necessarily the most informative status, its mostly telling you to be patient because the participant is still working away although it doesn’t tell you how far they’ve got.</li>
+<li><code class="docutils literal notranslate"><span class="pre">submitted</span></code> - the participant has finished the experiment and submitted their work. The work is now pending approval (MTurk requires the experimenter to approve or reject work before the participant is paid). Dallinger auto-approves all submissions so status should not remain as  <cite>submitted</cite> for very long. If it stays like this for more than a minute, chances are there is a bug in your experiment and you should expect emails from MTurk workers wondering when they will be paid.</li>
+<li><code class="docutils literal notranslate"><span class="pre">approved</span></code> - the work has been approved and the participant has been paid. This is good and suggests that things are going to plan.</li>
+<li><code class="docutils literal notranslate"><span class="pre">rejected</span></code> - by default Dallinger never rejects work, so if you are seeing this, something unexpected is going on.</li>
+<li><code class="docutils literal notranslate"><span class="pre">returned</span></code> - this means the participant quit half way through. A few participants will always change their mind and quit, but if you’re getting a lot of these there’s probably a bug and participants are quitting out of frustration. Mechanical Turk automatically recruits a replacement participant when a participant returns the experiment.</li>
+<li><code class="docutils literal notranslate"><span class="pre">abandoned</span></code> - Mechanical Turk gives participants a fixed amount of time in which to complete the study. If they time out they are kicked out and their status is set to abandoned. Lots of MTurk workers open the experiment but never do anything, so you’ll see a steady stream of these.  Mechanical Turk automatically recruits a replacement participant when a participant abandons an experiment.</li>
+<li><code class="docutils literal notranslate"><span class="pre">did_not_attend</span></code> - Dallinger allows an Experiment to check that participants are paying attention (see the demos for examples of this). If a participant fails this check, their status will be set to this value.</li>
+<li><code class="docutils literal notranslate"><span class="pre">bad_data</span></code> - Dallinger also allows Experiments to check that a participant’s data is correct (the right number of Nodes etc). If a participant fails this check their status will be set to <cite>bad_data</cite>. A few such cases are pretty much unavoidable - participants do strange and reckless things. But if you’re getting a lot of these then there’s probably a deeper issue. Unless instructed otherwise, Dallinger will automatically recruits a replacement participant.</li>
+<li><code class="docutils literal notranslate"><span class="pre">missing_notification</span></code> - Occasionally the communication system between Dallinger and Mechanical Turk fails. This used to cause serious problems, but Dallinger now checks for this. The most comon case is that a participant returns or abandons but Mechanical Turk never informs us. When this happens the relevant participant will be set to <cite>missing_notification</cite>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">replaced</span></code> - Another oddity with Mechanical Turk is that sometimes it recycles specific assignments if a participant returns it very shortly after accepting it. Again, Dallinger now tries to catch these instances and uses the status <cite>replaced</cite> to mark affected participants.</li>
+</ul>
+</div>
+<div class="section" id="participant-objects">
+<h2>Participant Objects<a class="headerlink" href="#participant-objects" title="Permalink to this headline">¶</a></h2>
+<p>While Participants have a lot of columns in their database they have very few functions compared to most other classes. They have some basic getter functions like Nodes (which gets the Participant’s Nodes of a specified <code class="docutils literal notranslate"><span class="pre">type</span></code>) and so on, as well as the capacity to <code class="docutils literal notranslate"><span class="pre">fail()</span></code>, but that’s about it.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Participants</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-participant">What is a Participant?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-participant-table">The Participant Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#participant-objects">Participant Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="network.html" title="previous chapter">Networks</a></li>
+      <li>Next: <a href="question.html" title="next chapter">Questions</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/participant.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

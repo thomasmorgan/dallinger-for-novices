@@ -1,0 +1,197 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Dallinger for Programming Novices &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introducing the Players" href="the_players.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="dallinger-for-programming-novices">
+<h1>Dallinger for Programming Novices<a class="headerlink" href="#dallinger-for-programming-novices" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="the_database.html#table-object-duality">Table/Object Duality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="the_database.html#why-do-we-have-a-database">Why do we have a database?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="node.html#what-is-a-node">What is a Node?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html#the-node-table">The Node table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html#sharedmixin-or-where-are-the-rest-of-my-columns">SharedMixin, or where are the rest of my columns?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html#node-objects">Node objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="node.html#kinds-of-nodes">Kinds of Nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vector.html#what-is-a-vector">What is a Vector?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vector.html#the-vector-table">The Vector table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vector.html#vector-objects">Vector Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="info.html#what-is-an-info">What is an Info?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="info.html#the-info-table">The Info Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="info.html#info-objects">Info Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="info.html#kinds-of-infos">Kinds of Infos</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transmission.html#what-is-a-transmission">What is a Transmission?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transmission.html#the-transmission-table">The Transmission Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transmission.html#transmission-objects">Transmission Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transformation.html#what-is-a-transformation">What is a Transformation?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformation.html#the-transformation-table">The Transformation Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transformation.html#transformation-objects">Transformation Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="network.html#what-is-a-network">What is a Network?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="network.html#the-network-table">The Network Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="network.html#network-objects">Network Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="network.html#kinds-of-networks">Kinds of Networks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="participant.html#what-is-a-participant">What is a Participant?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="participant.html#the-participant-table">The Participant Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="participant.html#participant-objects">Participant Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="question.html#what-is-a-question">What is a Question?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="question.html#the-question-table">The Question Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="question.html#question-objects">Question Objects</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#imports">Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#init">__init__</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#setup">setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#get-network-for-participant">get_network_for_participant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#data-check-submission-successful">data_check -&gt; submission_successful</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#recruit">recruit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="experiment.html#bots">Bots</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="experiments.html#bartlett1932">Bartlett1932</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="the_players.html" title="next chapter">Introducing the Players</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

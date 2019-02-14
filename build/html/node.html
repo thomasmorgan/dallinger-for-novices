@@ -1,0 +1,670 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Nodes &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Vectors" href="vector.html" />
+    <link rel="prev" title="The Database" href="the_database.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="nodes">
+<h1>Nodes<a class="headerlink" href="#nodes" title="Permalink to this headline">¶</a></h1>
+<p>Nodes are one type of object created by Dallinger. They have their own dedicated table in the database, and because they are probably the objects with which you’ll interact the most, we’ll examine them first.</p>
+<div class="figure">
+<img alt="" src="_static/class_chart.jpg" />
+</div>
+<div class="section" id="what-is-a-node">
+<h2>What is a Node?<a class="headerlink" href="#what-is-a-node" title="Permalink to this headline">¶</a></h2>
+<p>Nodes are a point in a network. If we’re thinking of a social network like Facebook, each node would be a user. Or, if we think about the London underground (a local rail network), each node would be a station.</p>
+<p>From the diagram above, we can see that in the Dallinger system, a Node requires a Network. What this means is that you cannot possibly create a Node outside of a Network. In the same way that all Facebook users are, by definition, part of the Facebook social network, all Nodes in Dallinger are, by definition, within a Network. Note that this doesn’t mean that a Node must be linked up to other Nodes - it is perfectly OK for a Node to be floating loose in space (just like Facebook users don’t have to have any friends). The only requirement is that the space it floats in is a Network.</p>
+<p>The other requirement of Nodes is a soft one: Nodes <em>might</em> have an associated Participant. This is because when participants take part in an experiment, they do so through a Node. Returning again to Facebook, the story is the same: when a human wishes to engage with Facebook they do so by creating a user account (the Facebook equivalent of a Node). So, why is this a soft requirement - don’t all nodes need a Participant? The answer is no. Dallinger also allows Nodes to be <cite>AI controlled</cite> such that they can take part in experiments without a human participant guiding their behavior. This way you can do a whole bunch of things like:</p>
+<ol class="arabic simple">
+<li>In a questionnaire experiment have a Node act as the quiz master, creating and sending out questions to human participants</li>
+<li>Have a translator Node: anything sent to it can be translated to any other language and sent back to the user</li>
+<li>Have confederate Nodes that masquerade as humans, but are actually following the experimenter’s bidding and trying to manipulate their behavior (think Russian Twitter bots)</li>
+</ol>
+<p>OK, maybe don’t actually do the last one, but you get the picture: by allowing Nodes to operate without a human Participant, Dallinger allows a much wider range of experimental designs than would otherwise be possible.</p>
+<p>The reverse is true also: a single Participant can be associated with multiple Nodes. In Facebook terms, this is like a single person having multiple accounts. Again, this opens up new experimental designs:</p>
+<ol class="arabic simple">
+<li>You can allow a Participant to take part in multiple Networks (because each Node is bound within a Particular Network, the Participant will need a different Node for each Network)</li>
+<li>You can have a whole team of Nodes under the control of a single Participant (maybe like foosball)</li>
+<li>A Participant can take part in the same experiment at separate times, and using a different Node for each time period helps you keep track of what happened when</li>
+</ol>
+<p>If you look back at the above diagram you’ll see that there are a couple of other arrows connected to Node (going to Infos and Vectors) but we’ll come to those in a couple of pages time.</p>
+</div>
+<div class="section" id="the-node-table">
+<h2>The Node table<a class="headerlink" href="#the-node-table" title="Permalink to this headline">¶</a></h2>
+<p>Remembering what we already covered about the table/object duality of Dallinger’s objects, let’s start by looking at the Node table. While each row tells us about a specific Node, right now we’re more interested in the column names, as these tell us the properties common to all Nodes. The quickest way to do this is in Postico: we can open up the Node table and look at the column names. But there’s also a harder (yet more informative) way: we can look at the Dallinger code that creates the table. Guess which way we’re going to do it… that’s right: the hard and informative way (you’ll thank me later). So, to start let’s open up the code. You’ll want to open the file <cite>models.py</cite> (Dallinger/dallinger/models.py). It’s called “models.py” because that’s a common name for files that contain the code descriptions of the key classes that make up a program. Later on in this guide you’ll see how to create custom classes on an experiment-by-experiment basis, and in that case you’ll be making your own models.py file. But let’s not worry about that for now. Instead, open up models.py and look for the definition of the Node class. You’ll know when you’ve found it because it starts with the following line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">SharedMixin</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>Immediately below this you’ll see</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;node&quot;</span>
+</pre></div>
+</div>
+<p>And as you might have guessed, this specifies that objects of this class (<code class="docutils literal notranslate"><span class="pre">Node</span></code>) will get stored in a table called <code class="docutils literal notranslate"><span class="pre">node</span></code>. The next few lines create some columns that you should recognize from Postico:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: A String giving the name of the class. Defaults to</span>
+<span class="c1">#: ``node``. This allows subclassing.</span>
+
+<span class="nb">type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;polymorphic_on&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+    <span class="s1">&#39;polymorphic_identity&#39;</span><span class="p">:</span> <span class="s1">&#39;node&#39;</span>
+<span class="p">}</span>
+
+<span class="c1">#: the id of the network that this node is a part of</span>
+<span class="n">network_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;network.id&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the network the node is in</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;all_nodes&quot;</span><span class="p">)</span>
+
+<span class="c1">#: the id of the participant whose node this is</span>
+<span class="n">participant_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;participant.id&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the participant the node is associated with</span>
+<span class="n">participant</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Participant</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s1">&#39;all_nodes&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s go through these one at a time. The first one creates a column called <code class="docutils literal notranslate"><span class="pre">type</span></code>, and specifies that it’s a String up to 50 characters long. The immediately following lines allow this column to take on different values (i.e. be “polymorphic”). Why would we want this? Well, remember that due to table/object duality at some point any row in the table is going to be read and turned into an object, but the program needs to know what kind of object to turn it into. You might expect things in the Node table to be turned into Nodes, and in general you are right. But remember how we discussed above that different kinds of Nodes can be created (bots, for instance). The <code class="docutils literal notranslate"><span class="pre">type</span></code> column is what lets the program know what kind of Node object to turn each row of the table into. We’ll see examples where types other than <code class="docutils literal notranslate"><span class="pre">node</span></code> are used later on, but for now, let’s just stick with <code class="docutils literal notranslate"><span class="pre">node</span></code>.</p>
+<p>The next row creates the <code class="docutils literal notranslate"><span class="pre">network_id</span></code> column. It contains an integer (not a String). The next bit (<code class="docutils literal notranslate"><span class="pre">ForeignKey('network.id')</span></code>) might seem a bit mysterious, but again it can be solved by thinking about row/object duality. Recall that if you want to know details of a Node’s Network you can just do something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">node</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">creation_time</span>
+</pre></div>
+</div>
+<p>This <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> is what lets you do that. It says that whatever you get by typing <code class="docutils literal notranslate"><span class="pre">node.network_id</span></code>, you should get the same thing by typing <code class="docutils literal notranslate"><span class="pre">node.network.id</span></code>. In fact it doesn’t just say that you <em>should</em> get the same thing, it says you <em>will</em> get the same thing. The <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> is what firmly cements the relationship between a Node and its Network.</p>
+<p>The final bit (<code class="docutils literal notranslate"><span class="pre">index=True</span></code>) really doesn’t need to trouble you. It’s basically an instruction to the database to keep tabs on this column. In practice it slightly slows down row creation, but hugely speeds up searches across the table. If we didn’t have this set to <code class="docutils literal notranslate"><span class="pre">true</span></code> experiments would steadily slow down as more participants took part in the experiment and the tables grew.</p>
+<p>OK, on to the next one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1">#: the network the node is in</span>
+<span class="n">network</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span><span class="n">Network</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="s2">&quot;all_nodes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At first this looks like another column, but hang on - if you look in Postico you’ll see that there isn’t a “network” column in the Node table at all, just “network_id”, so what is this? Note also that this line of code says nothing about a <code class="docutils literal notranslate"><span class="pre">Column</span></code>, instead it’s creating a <code class="docutils literal notranslate"><span class="pre">relationship</span></code>. As you might have guessed, this line is what allows you to do things like <code class="docutils literal notranslate"><span class="pre">node.network.creation_time</span></code>. Specifically, it sets up the link allowing you to do <code class="docutils literal notranslate"><span class="pre">node.network</span></code> and get a Network object in return. You might also notice that it works in reverse thanks to the <code class="docutils literal notranslate"><span class="pre">backref</span></code> value. So you can do <code class="docutils literal notranslate"><span class="pre">network.all_nodes</span></code> and get a list of all the Nodes in a Network.</p>
+<p>Relationships are extremely handy shortcuts to jump between objects of different kinds without having to type out long and boring queries to do with the tables. In our model of table/object duality relationships are firmly on the object side of things: once you export the data and are working with spreadsheets they will no longer be available.</p>
+</div>
+<div class="section" id="sharedmixin-or-where-are-the-rest-of-my-columns">
+<h2>SharedMixin, or where are the rest of my columns?<a class="headerlink" href="#sharedmixin-or-where-are-the-rest-of-my-columns" title="Permalink to this headline">¶</a></h2>
+<p>If you look at the next bit of code in models.py, you’ll see that it has stopped creating columns and started doing other things. But, if you look in Postico you’ll see that there are a whole bunch of other columns, so where are these coming from? The answer is from a different class called <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> can be found in models.py too, you can find it by searching for this line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="k">class</span> <span class="nc">SharedMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="sd">&quot;&quot;&quot;Create shared columns.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>As the short comment tag suggests, <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> is a class that creates columns that are going to be shared by all the tables, not just the Node table. By using <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>, we don’t have to manually add these columns to every table, we can just write them out once and then add them as a group to each table. So how are the columns in <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> added to the node table? Well, if you go back to the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class definition, you’ll see that <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> is listed in the parentheses along with the word <code class="docutils literal notranslate"><span class="pre">Base</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">SharedMixin</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>What this means is that <code class="docutils literal notranslate"><span class="pre">Node</span></code> inherits from both <code class="docutils literal notranslate"><span class="pre">Base</span></code> and <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code>. You don’t need to worry what <code class="docutils literal notranslate"><span class="pre">Base</span></code> does for now (it basically just means “make a table for this kind of thing”), but placing <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> here tells Dallinger to add all of the columns defined in the <code class="docutils literal notranslate"><span class="pre">SharedMixin</span></code> class to the “node” table. So what are these columns? Well, by-and-large, they’re pretty straightforward. Here are the first two:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: a unique number for every entry. 1, 2, 3 and so on...</span>
+<span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the time at which the Network was created.</span>
+<span class="n">creation_time</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">timenow</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">id</span></code> is an Integer, it’s also the <cite>primary key</cite> (<code class="docutils literal notranslate"><span class="pre">primary_key=True</span></code>) of the table, which means that no two rows can have the same value. The <code class="docutils literal notranslate"><span class="pre">creation_time</span></code> holds a time, it can’t be <code class="docutils literal notranslate"><span class="pre">null</span></code> (i.e. all filled rows must have a value), and unless you tell it otherwise, it will be filled with whatever the time was when the row was filled (that’s the <code class="docutils literal notranslate"><span class="pre">default=timenow</span></code> bit).</p>
+<p>After this there are a bunch of <code class="docutils literal notranslate"><span class="pre">property</span></code> columns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1">#: a generic column that can be used to store experiment-specific details in</span>
+<span class="c1">#: String form.</span>
+<span class="n">property1</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Text</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These can be used for anything you feel like, we’ll see some examples of this later on.</p>
+<p>Next come <code class="docutils literal notranslate"><span class="pre">failed</span></code> and <code class="docutils literal notranslate"><span class="pre">time_of_death</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#: boolean indicating whether the Network has failed which</span>
+<span class="c1">#: prompts Dallinger to ignore it unless specified otherwise. Objects are</span>
+<span class="c1">#: usually failed to indicate something has gone wrong.</span>
+<span class="n">failed</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Boolean</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">#: the time at which failing occurred</span>
+<span class="n">time_of_death</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">failed</span></code> is used to mark rows as, well, failed and <code class="docutils literal notranslate"><span class="pre">time_of_death</span></code> simply records the time at which this failing occurred. Rows start off unfailed (i.e. their <code class="docutils literal notranslate"><span class="pre">failed</span></code> value is <code class="docutils literal notranslate"><span class="pre">False</span></code>), but once rows are marked as failed (i.e. their <code class="docutils literal notranslate"><span class="pre">failed</span></code> value is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>) Dallinger will ignore them from then on, unless told otherwise. For instance, if you ask how many Nodes are in a Network, Dallinger will tell you how many <em>unfailed</em> Nodes are in the Network. Similarly, if you ask for all the Nodes associated with a particular Participant, Dallinger will give you a list of all the <em>unfailed</em> Nodes of that Participant.</p>
+<p>Why would you want to fail a Node? Well let’s say that a participant spills coffee on their computer half way through the experiment and they disappear. You recruit another participant to take their place, but you now need a way to get rid of the incomplete data from the earlier participant. This is what failing is for - the data isn’t deleted, but, unless you tell it otherwise, Dallinger will continue with the experiment as if those rows in the table were not there. There’s a thousand reasons you might want to fail a Participant Node, and we’ll see many more of them later on in this guide.</p>
+<p>The final column is <code class="docutils literal notranslate"><span class="pre">details</span></code>. This serves a very similar function to the <code class="docutils literal notranslate"><span class="pre">property</span></code> columns discussed above, but is fancier and generally better. Chances are that in a future version of Dallinger, <code class="docutils literal notranslate"><span class="pre">details</span></code> will entirely replace the <code class="docutils literal notranslate"><span class="pre">property</span></code> columns and so this bit of the guide will need to be rewritten.</p>
+</div>
+<div class="section" id="node-objects">
+<h2>Node objects<a class="headerlink" href="#node-objects" title="Permalink to this headline">¶</a></h2>
+<p>So far we’ve covered Nodes from the table view, but remember that all Dallinger classes have table/object duality and in general the object side of things is far more useful. So what are the extra features of Nodes if we treat them as objects? Let’s return to the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class in <cite>models.py</cite> and look immediately below where the columns were created. The first function is <code class="docutils literal notranslate"><span class="pre">__init__</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">participant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="sd">&quot;&quot;&quot;Create a node.&quot;&quot;&quot;</span>
+<span class="c1"># check the network hasn&#39;t failed</span>
+<span class="k">if</span> <span class="n">network</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create node in </span><span class="si">{}</span><span class="s2"> as it has failed&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">network</span><span class="p">))</span>
+<span class="c1"># check the participant hasn&#39;t failed</span>
+<span class="k">if</span> <span class="n">participant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">participant</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> cannot create a node as it has failed&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">participant</span><span class="p">))</span>
+<span class="c1"># check the participant is working</span>
+<span class="k">if</span> <span class="n">participant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">participant</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s2">&quot;working&quot;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> cannot create a node as they are not working&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">participant</span><span class="p">))</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">network</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">network_id</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">id</span>
+<span class="n">network</span><span class="o">.</span><span class="n">calculate_full</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="n">participant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">participant</span> <span class="o">=</span> <span class="n">participant</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">participant_id</span> <span class="o">=</span> <span class="n">participant</span><span class="o">.</span><span class="n">id</span>
+</pre></div>
+</div>
+<p>All objects in python need an <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function. They tell the program how to make objects of this kind, and Dallinger is no different. So this function tells Dallinger how to make a <code class="docutils literal notranslate"><span class="pre">Node</span></code>. It’s quite straightforward: the function demands that a <code class="docutils literal notranslate"><span class="pre">Network</span></code> object be sent to it, but will also accept a <code class="docutils literal notranslate"><span class="pre">Participant</span></code> object too (remember that Nodes need a Network, but only <em>might</em> have a Participant). The function then checks to make sure that the Network isn’t failed (yes, just like Nodes, Networks can fail too, and no, once a Network is failed, you cannot add more Nodes to it), that the Participant isn’t failed (ditto) and that the Participant is “working” (more on this in the participants page). If all these checks are satisfied it adds the <code class="docutils literal notranslate"><span class="pre">Network</span></code> to itself (think of this as filling in a row and creating relationships) and it does the same for its <code class="docutils literal notranslate"><span class="pre">Participant</span></code> too if it’s been sent one.</p>
+<p>The next two functions, <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> and <code class="docutils literal notranslate"><span class="pre">__json__</span></code> both return String representations of the <code class="docutils literal notranslate"><span class="pre">Node</span></code>. <code class="docutils literal notranslate"><span class="pre">__repr__</span></code> returns a very basic one, whereas <code class="docutils literal notranslate"><span class="pre">__json__</span></code> returns a full description of all columns in the <cite>node</cite> database table. You’ll see <code class="docutils literal notranslate"><span class="pre">__json__</span></code> used a lot as it’s a handy way to create a String containing all the information about a Node that can then be sent over the Internet.</p>
+<p>The next few functions are all used to get other things from the database. Let’s look at the first one, <code class="docutils literal notranslate"><span class="pre">vectors()</span></code>. If you’re new to Dallinger, you probably don’t know what vectors are yet, but for now just think of them as links that connect Nodes in the Network, and just like Nodes, they have their own table where each row corresponds to a different Vector. Now let’s say you want to know how many vectors a Node is connected with. You can do this by doing a query over the Vector table (and this is what most of the contents of this function is doing), but we’ve provided this handy function to make your life easier, so now you can do something like <code class="docutils literal notranslate"><span class="pre">node.vectors()</span></code> and you’ll be sent a list of Vectors that join this Node to other Nodes. But you’ve actually got a few more options as shown by the function declaration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">failed</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get vectors that connect at this node.</span>
+
+<span class="sd">    Direction can be &quot;incoming&quot;, &quot;outgoing&quot; or &quot;all&quot; (default).</span>
+<span class="sd">    Failed can be True, False or all</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>So you can request Vectors that are outgoing from a Node like this: <code class="docutils literal notranslate"><span class="pre">node.vectors(direction=&quot;outgoing&quot;)</span></code> or you can even ask for failed Vectors to be included like this: <code class="docutils literal notranslate"><span class="pre">node.vectors(failed=&quot;all&quot;)</span></code>. To get a sense of how much work this is saving you, this is what <code class="docutils literal notranslate"><span class="pre">node.vectors()</span></code> looks like as a query over the tables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Vector</span><span class="o">.</span><span class="n">query</span>\
+<span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span><span class="n">Vector</span><span class="o">.</span><span class="n">failed</span> <span class="o">==</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">or_</span><span class="p">(</span><span class="n">Vector</span><span class="o">.</span><span class="n">destination_id</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">Vector</span><span class="o">.</span><span class="n">origin_id</span> <span class="o">==</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)))</span>\
+<span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In a more human language this corresponds to “Please do a search over the Vector table returning only those rows where the failed column contains False AND either the destination_id column OR origin_id column contains the same number as the id of the Node”. Pretty elaborate! It’s methods such as these that will allow you to write quite complex experiments in remarkably few lines of code - you just need to learn about them first. As a note, observe that table queries by default don’t ignore failed rows (we had to ask the query to only return not failed rows), so if you ever do start writing out queries the long way instead of using Dallinger’s handy shortcuts don’t forget to add this.</p>
+<p>The next few functions are just other queries over the tables in the database but with wrappers that make them nicer to use. As you read the following you should try to figure out how the code is doing what it does. You should also compare this with the more technical documentation <span class="xref std std-ref">here</span> as down the line you’ll want to work from the documentation or code itself, and not from this more cumbersome guide.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.neighbors()</span></code> will return a list of Nodes that the central Node has a connection to. Let’s say you want to offer a participant a choice of other participants who they can ask for help. <code class="docutils literal notranslate"><span class="pre">Node.neighbors()</span></code> is really useful for this, as it gives a list of all other Nodes the participant’s Node is currently connected to and so are available to help. If you look at the function you can see it accepts the parameters <code class="docutils literal notranslate"><span class="pre">direction</span></code> and <code class="docutils literal notranslate"><span class="pre">type</span></code>. These tell the query to look only for neighbors of a certain type (e.g. bots, or agents etc.) or connected to the focal Node in a certain direction (Vectors are directional so there might be a Vector from A to B, but not from B to A). You’ve probably also noticed that the function can take a parameter called <code class="docutils literal notranslate"><span class="pre">failed</span></code> but further inspection of the code shows it will raise an error if you try to use this parameter - I’ll leave it up to you to read the code to see why this is.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.is_connected()</span></code> looks for a Vector between two specific Nodes. Again, a direction parameter allows you to specify whether you’re looking for a connection from A to B, or to B from A, or both.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.infos()</span></code> gets all the Infos made by a Node of a specified <cite>type</cite>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.received_infos()</span></code> gets all the Infos sent to a Node by other Nodes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.transmissions()</span></code> get all Transmissions sent or received by a Node. Parameters can be used to be more precise, for instance only getting Transmissions sent by the Node, or maybe only getting Transmissions sent to the Node but that have not yet been read (this is basically like checking your inbox).</p>
+<p><code class="docutils literal notranslate"><span class="pre">Node.transformations()</span></code> does a query over the transformation table, but Transformations are hard to understand, so let’s leave this for now.</p>
+<p>After this the functions change from looking over the database to get information about a Node, to being instructions that tell a Node to do something. Once your experiment is running, when participants first arrive they typically do quite a few of the “get” kinds of functions in order to figure out who they are, and what they need to do. But once participants start making decisions you’ll see more and more of the “do something” kinds of functions. Let’s walk though a few examples, the first is <code class="docutils literal notranslate"><span class="pre">node.fail()</span></code>, here’s the code in full:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fail</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fail a node, setting its status to &quot;failed&quot;.</span>
+
+<span class="sd">    Also fails all vectors that connect to or from the node.</span>
+<span class="sd">    You cannot fail a node that has already failed, but you</span>
+<span class="sd">    can fail a dead node.</span>
+
+<span class="sd">    Set node.failed to True and :attr:`~dallinger.models.Node.time_of_death`</span>
+<span class="sd">    to now. Instruct all not-failed vectors connected to this node, infos</span>
+<span class="sd">    made by this node, transmissions to or from this node and</span>
+<span class="sd">    transformations made by this node to fail.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="s2">&quot;Cannot fail </span><span class="si">{}</span><span class="s2"> - it has already failed.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_of_death</span> <span class="o">=</span> <span class="n">timenow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">calculate_full</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectors</span><span class="p">():</span>
+            <span class="n">v</span><span class="o">.</span><span class="n">fail</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">():</span>
+            <span class="n">i</span><span class="o">.</span><span class="n">fail</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmissions</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">fail</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformations</span><span class="p">():</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">fail</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Remember that we tell a Node to fail when we want to make it disappear for some reason (like a participant spilling coffee on their keyboard and so vanishing mid way through an experiment). This function is quite simple. It first checks that the Node isn’t already failed (<code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">self.failed</span> <span class="pre">is</span> <span class="pre">True</span></code>), because telling a Node to fail twice probably indicates there is a bug in your code. If this check passes, the Node has its <code class="docutils literal notranslate"><span class="pre">failed</span></code> value set to <code class="docutils literal notranslate"><span class="pre">True</span></code> (you’ll be able to see this in the failed column of the node table in the database) and its <code class="docutils literal notranslate"><span class="pre">time_of_death</span></code> value set to whatever the time is now (again this will be visible in the database). But note it then does a whole bunch of other things: it gets lists of all the Vectors connected to the Node (<code class="docutils literal notranslate"><span class="pre">self.vectors()</span></code>), all the Infos made by the Node, all the Transmissions sent or received by the Node and all the Transformations made by the Node, and tells them to fail as well. In this way the database remains coherent: if we didn’t do this there would be a bunch of Infos, for instance, without the Node that created them. (Well, the Node would still be there in the database, just marked as failed, but remember that by default Dallinger ignores all failed rows in the database, but it wouldn’t know to ignore a failed Node’s Infos unless they were also failed too).</p>
+<p>The next function is <code class="docutils literal notranslate"><span class="pre">node.connect()</span></code>, again, here’s the code in full:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">whom</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a vector from self to/from whom.</span>
+
+<span class="sd">    Return a list of newly created vector between the node and whom.</span>
+<span class="sd">    ``whom`` can be a specific node or a (nested) list of nodes. Nodes can</span>
+<span class="sd">    only connect with nodes in the same network. In addition nodes cannot</span>
+<span class="sd">    connect with themselves or with Sources. ``direction`` specifies the</span>
+<span class="sd">    direction of the connection it can be &quot;to&quot; (node -&gt; whom), &quot;from&quot; (whom</span>
+<span class="sd">    -&gt; node) or both (node &lt;-&gt; whom). The default is &quot;to&quot;.</span>
+
+<span class="sd">    Whom may be a (nested) list of nodes.</span>
+
+<span class="sd">    Will raise an error if:</span>
+<span class="sd">        1. whom is not a node or list of nodes</span>
+<span class="sd">        2. whom is/contains a source if direction is to or both</span>
+<span class="sd">        3. whom is/contains self</span>
+<span class="sd">        4. whom is/contains a node in a different network</span>
+
+<span class="sd">    If self is already connected to/from whom a Warning</span>
+<span class="sd">    is raised and nothing happens.</span>
+
+<span class="sd">    This method returns a list of the vectors created</span>
+<span class="sd">    (even if there is only one).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check direction</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a valid direction for connect()&quot;</span>
+                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span>
+
+    <span class="c1"># make whom a list</span>
+    <span class="n">whom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="n">whom</span><span class="p">])</span>
+
+    <span class="c1"># make the connections</span>
+    <span class="n">new_vectors</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+        <span class="n">already_connected_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">whom</span><span class="o">=</span><span class="n">whom</span><span class="p">)])</span>
+        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">connected</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">whom</span><span class="p">,</span> <span class="n">already_connected_to</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">connected</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning! </span><span class="si">{}</span><span class="s2"> already connected to </span><span class="si">{}</span><span class="s2">, &quot;</span>
+                      <span class="s2">&quot;instruction to connect will be ignored.&quot;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">node</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+        <span class="n">already_connected_from</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="n">whom</span><span class="o">=</span><span class="n">whom</span><span class="p">)])</span>
+        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">connected</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">whom</span><span class="p">,</span> <span class="n">already_connected_from</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">connected</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning! </span><span class="si">{}</span><span class="s2"> already connected from </span><span class="si">{}</span><span class="s2">, &quot;</span>
+                      <span class="s2">&quot;instruction to connect will be ignored.&quot;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="n">node</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">new_vectors</span>
+</pre></div>
+</div>
+<p>OK, this function is a lot longer and more complicated than <code class="docutils literal notranslate"><span class="pre">node.fail()</span></code>, but the first half is basically a comment explaining what the function does: it joins Nodes via Vectors. But let’s break it down bit by bit to see exactly how it does this:</p>
+<p>First note that the function takes two arguments: <code class="docutils literal notranslate"><span class="pre">whom</span></code> and <code class="docutils literal notranslate"><span class="pre">direction</span></code> (<code class="docutils literal notranslate"><span class="pre">self</span></code> is always listed in python functions, so don’t worry about it for now).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">whom</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>The next step is to check that <code class="docutils literal notranslate"><span class="pre">direction</span></code> has been given an acceptable value. The default is “to” (this is why it’s listed in the above line of code), but “from” and “both” are also ok. If any other value is passed an error will be raised and the program will crash.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># check direction</span>
+<span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a valid direction for connect()&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The other argument (<code class="docutils literal notranslate"><span class="pre">whom</span></code>), which determines which other Nodes the Node will connect with, needs a bit more preparation. First it’s “flattened”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># make whom a list</span>
+<span class="n">whom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="n">whom</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>To understand why this is needs a bit of explanation. When we were creating this function we wanted it to be quite powerful in that the user could pass anything vaguely sensible and the function would behave intuitively. So, if a user passed a single Node we wanted that Node to connect with the user’s Node. The user might pass a Python <code class="docutils literal notranslate"><span class="pre">list</span></code> of Nodes, and again, we want the user’s Node to connect with all <code class="docutils literal notranslate"><span class="pre">Node</span></code> objects in that list. The user also might do something unusual like pass a list containing other lists, each of which contains one or more other <code class="docutils literal notranslate"><span class="pre">Node</span></code> objects. To handle this, the first thing the function does it take whatever it has been sent and turn it into a single, unnested Python <code class="docutils literal notranslate"><span class="pre">list</span></code>. This is what the <code class="docutils literal notranslate"><span class="pre">flatten()</span></code> function does: if the user sends a single <code class="docutils literal notranslate"><span class="pre">Node</span></code>, <code class="docutils literal notranslate"><span class="pre">flatten()</span></code> turns it into a list containing just that Node. Here’s a couple more examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">node1</span>                                                           <span class="o">-&gt;</span> <span class="n">flatten</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">node1</span><span class="p">]</span>
+<span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">]</span>                                          <span class="o">-&gt;</span> <span class="n">flatten</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">]</span>
+<span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="p">[</span><span class="n">node3</span><span class="p">]]</span>                         <span class="o">-&gt;</span> <span class="n">flatten</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">node3</span><span class="p">]</span>
+<span class="p">[[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">],</span> <span class="p">[</span><span class="n">node3</span><span class="p">,</span> <span class="n">node4</span><span class="p">]]</span>        <span class="o">-&gt;</span> <span class="n">flatten</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">node3</span><span class="p">,</span> <span class="n">node4</span><span class="p">]</span>
+<span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="p">[</span><span class="n">node2</span><span class="p">,</span> <span class="p">[</span><span class="n">node3</span><span class="p">,</span> <span class="n">node4</span><span class="p">]]]</span>        <span class="o">-&gt;</span> <span class="n">flatten</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">node1</span><span class="p">,</span> <span class="n">node2</span><span class="p">,</span> <span class="n">node3</span><span class="p">,</span> <span class="n">node4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We’re now in a position where the function can go through this list and create connections to each node one at a time. In fact its going to go through the list twice. It makes a first pass creating all outgoing connections, and then does it again making incoming connections. That’s why the function has this structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+
+    <span class="c1">## make some connections</span>
+
+<span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;from&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+
+    <span class="c1">## make some connections</span>
+</pre></div>
+</div>
+<p>In both cases the first thing it does is check whether the requested connection already exists. If there is already a (not failed) Vector from A to B, then it makes no sense that you’ve asked for another one. Here’s the code that does this check, note that it’s using the <code class="docutils literal notranslate"><span class="pre">is_connected()</span></code> function that we’ve covered already:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">already_connected_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span>
+    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">is_connected</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">whom</span><span class="o">=</span><span class="n">whom</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>Here it’s passing a list of Nodes to <code class="docutils literal notranslate"><span class="pre">is_connected()</span></code> and it’s getting a list of <code class="docutils literal notranslate"><span class="pre">True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code> values back. So let’s say you passed three nodes as targets to <code class="docutils literal notranslate"><span class="pre">connect()</span></code> but you’re already connected to the third one of them, <code class="docutils literal notranslate"><span class="pre">is_connected()</span></code> will return <code class="docutils literal notranslate"><span class="pre">[False,</span> <span class="pre">False,</span> <span class="pre">True]</span></code>. The function then goes through both the list of Nodes and the list of whether a connection already exists, at the same time. If a connection exists, it tells you off (but doesn’t crash), and if a connection doesn’t exist then it makes one. Here’s this bit of the code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">connected</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">whom</span><span class="p">,</span> <span class="n">already_connected_to</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">connected</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning! </span><span class="si">{}</span><span class="s2"> already connected to </span><span class="si">{}</span><span class="s2">, &quot;</span>
+              <span class="s2">&quot;instruction to connect will be ignored.&quot;</span>
+              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">new_vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">node</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Notice that the final line here contains the instructions to make new Vectors (i.e. it contains <code class="docutils literal notranslate"><span class="pre">Vector()</span></code>). You’re probably not totally clear on what a Vector is yet, but we’ll come to that shortly. For now, just note that this command will cause new rows to be added to the Vector table (remember the tables are a record of everything that ever happens, so if you don’t write stuff down in the table it will be forgotten). And at the very end of the function a list containing all the newly made Vectors is returned to whatever called the function in the first place:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">new_vectors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Vector</span><span class="p">(</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="n">node</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We made it! OK, go get a cup of tea and come back when you’re ready for more.</p>
+<p>The next function is <code class="docutils literal notranslate"><span class="pre">flatten()</span></code>, but I’ll leave it up to you to see how it turns nested <code class="docutils literal notranslate"><span class="pre">lists</span></code> into flat <code class="docutils literal notranslate"><span class="pre">lists</span></code>. After this we get to <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> which is another big and complicated function. The purpose of <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> is to send information (<cite>Infos</cite>, more on what these are later) between connected Nodes. If you’re using Dallinger chances are that you’re interested in doing networked experiments of some kind, and so you’ll be using this function a lot. You might, for instance, have a chat room where participants can send messages to each other. You might alternatively want to show the decisions of past participants to current participants. Because <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> is used so often it’s important to understand it, so we’ll go through it bit-by-bit again. Fortunately, it uses some of the same tricks as <code class="docutils literal notranslate"><span class="pre">connect()</span></code>. Let’s break it down:</p>
+<p>First off let’s see what arguments it takes: <code class="docutils literal notranslate"><span class="pre">what</span></code> and <code class="docutils literal notranslate"><span class="pre">to_whom</span></code>. As the comment makes clear, <code class="docutils literal notranslate"><span class="pre">what</span></code> determines the contents of the transmission, while <code class="docutils literal notranslate"><span class="pre">to_whom</span></code> determines to which Nodes, Transmissions will be sent to.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">transmit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">to_whom</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="s2">&quot;&quot;&quot;Transmit one or more infos from one node to another.</span>
+</pre></div>
+</div>
+<p>As before, we try to allow the arguments to contain a range of different things users might send and for the function to handle them graciously. As with <code class="docutils literal notranslate"><span class="pre">connect()</span></code>, <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> is OK with single objects, lists of multiple objects and (arbitrarily) nested lists of objects. It also accepts Python class names: for <code class="docutils literal notranslate"><span class="pre">what</span></code> you can send a specific Info, but you can also just name the class <code class="docutils literal notranslate"><span class="pre">Info</span></code>, in which case the function will try to send everything the Node has made of that class (i.e. all its Infos). It also accepts <code class="docutils literal notranslate"><span class="pre">None</span></code> in which case the Node’s default behavior kicks in. You can even combine specific objects, classes of objects, and <code class="docutils literal notranslate"><span class="pre">None</span></code> in the same (nested) <code class="docutils literal notranslate"><span class="pre">list</span></code> if you want. The function handles this by collapsing whatever nested <code class="docutils literal notranslate"><span class="pre">list</span></code> you send into a single <code class="docutils literal notranslate"><span class="pre">list</span></code> (actually a <code class="docutils literal notranslate"><span class="pre">set</span></code>, but this is basically a <code class="docutils literal notranslate"><span class="pre">list</span></code> that doesn’t contain duplicates) and by turning any classes into <code class="docutils literal notranslate"><span class="pre">lists</span></code> of all objects of that class. Here’s how it does it. First we make an empty set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">whats</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then we flatten whatever was sent and go through it one element at a time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">what</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="n">what</span><span class="p">]):</span>
+</pre></div>
+</div>
+<p>If it’s a <code class="docutils literal notranslate"><span class="pre">None</span></code> we call the default behavior function, (<code class="docutils literal notranslate"><span class="pre">_what()</span></code>), to see what we should do. <code class="docutils literal notranslate"><span class="pre">_what()</span></code> is directly after <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> in models.py and by default it returns <code class="docutils literal notranslate"><span class="pre">Info</span></code>. So, by default, if you pass <code class="docutils literal notranslate"><span class="pre">None</span></code> it gets turned into <code class="docutils literal notranslate"><span class="pre">Info</span></code>. You can overwrite the function <code class="docutils literal notranslate"><span class="pre">_what()</span></code> if you want to change this behavior and we’ll see examples of this later on.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">what</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">what</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_what</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Next, if it’s a Class (and only if it’s a Class of <code class="docutils literal notranslate"><span class="pre">Info</span></code>) we get a <cite>‘list`</cite> of all <code class="docutils literal notranslate"><span class="pre">Infos</span></code> of that class and add (i.e. <code class="docutils literal notranslate"><span class="pre">update()</span></code>) them to the set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">what</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+    <span class="n">whats</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infos</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">what</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Finally, if it’s just a regular <code class="docutils literal notranslate"><span class="pre">Info</span></code> object, we just add it to the set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">else</span><span class="p">:</span>
+    <span class="n">whats</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">what</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Exactly the same process is repeated for <code class="docutils literal notranslate"><span class="pre">to_whom</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">to_whoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">to_whom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">flatten</span><span class="p">([</span><span class="n">to_whom</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="n">to_whom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">to_whom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_whom</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">to_whom</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">to_whom</span><span class="p">,</span> <span class="n">Node</span><span class="p">):</span>
+        <span class="n">to_whoms</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">to_whom</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">to_whoms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">to_whom</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So now we have two sets: one of all the Infos we want to send, and another of all the nodes we want to send the Infos to. The final step is to actually send the Infos to the Nodes. Note that because all the Infos are going to be sent to all the Nodes, if you want to have just some Infos go to just some Nodes you’ll need to make separate calls to <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> effectively sending the Infos in batches. The first step in actually sending the Infos is to make an empty list to store the transmissions that will be created (again these will be stored as rows in the transmission table in the database) and to get a set of the outgoing Vectors of the Node. This is because you’re only allowed to send a Transmission to a Node if you have a Vector going from you to them and so you’ll need to know what all your Vectors are to check this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transmissions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vectors</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;outgoing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then we set up two <code class="docutils literal notranslate"><span class="pre">for</span></code> loops to go through each Info in the <code class="docutils literal notranslate"><span class="pre">whats</span></code> set and each Node in the <code class="docutils literal notranslate"><span class="pre">to_whoms</span></code> set.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">what</span> <span class="ow">in</span> <span class="n">whats</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">to_whom</span> <span class="ow">in</span> <span class="n">to_whoms</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>For each of these we try to find the Vector from you to the target Node, but if it doesn’t exist, the program crash and scold you:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                <span class="k">try</span><span class="p">:</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vectors</span>
+              <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">destination_id</span> <span class="o">==</span> <span class="n">to_whom</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> cannot transmit to </span><span class="si">{}</span><span class="s2"> as it does not have &quot;</span>
+        <span class="s2">&quot;a connection to them&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_whom</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>As long as it exists, we create a new <code class="docutils literal notranslate"><span class="pre">Transmission</span></code> object and add it to the <code class="docutils literal notranslate"><span class="pre">list</span></code>. Note that the <code class="docutils literal notranslate"><span class="pre">Transmission</span></code> is defined by <code class="docutils literal notranslate"><span class="pre">what</span></code> is being sent, but not <code class="docutils literal notranslate"><span class="pre">to_whom</span></code> it is being sent, instead it’s being defined by the Vector it’s being sent along with. More on this later.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">Transmission</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">what</span><span class="p">,</span> <span class="n">vector</span><span class="o">=</span><span class="n">vector</span><span class="p">)</span>
+<span class="n">transmissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At the end of all this we send the finished <code class="docutils literal notranslate"><span class="pre">list</span></code> back to whoever called the function in the first place.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">transmissions</span>
+</pre></div>
+</div>
+<p>Note that each Transmission is from just one Node, to one other Node, and contains just a single Info. So if you ask <cite>node1</cite> to send five different Infos to <cite>node2</cite>, you’ll actually get back a list of 5 Transmissions (and 5 rows will be added to the database). Similarly, if you ask a Node to send 10 Infos to 10 Nodes you’ll get a total of 100 Transmissions.</p>
+<p>OK, go get another cup of tea — maybe something stronger too, like a biscuit — but don’t worry the end is in sight.</p>
+<p>Right, let’s say you’ve managed to send some Transmissions to nodeB. What this actually means is that you’ve added a few more rows to the transmission table. But how can we tell NodeB to notice that this has happened? That’s what the next function, <code class="docutils literal notranslate"><span class="pre">receive()</span></code> does. When a Node gets a <code class="docutils literal notranslate"><span class="pre">receive()</span></code> message, it basically checks its inbox. Let’s go through it slowly. First, note that the function takes a <code class="docutils literal notranslate"><span class="pre">what</span></code> argument, but that this defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>Next, note that the function checks that the receiving Node hasn’t failed. Failed Nodes aren’t allowed to do anything anymore, and so if you try to make one receive some Transmissions, you’ll get an error.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> cannot receive as it has failed.&quot;</span>
+                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Assuming this check passes, the function then tries to work out what exactly is being received. If you didn’t pass anything, <code class="docutils literal notranslate"><span class="pre">what</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> and if the function sees that <code class="docutils literal notranslate"><span class="pre">what</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> it just looks up a list of all your pending Transmissions (more on “pending” in the Transmissions page).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">received_transmissions</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">if</span> <span class="n">what</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">pending_transmissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmissions</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;incoming&quot;</span><span class="p">,</span>
+                                               <span class="n">status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It then goes through all these transmissions, changes their <code class="docutils literal notranslate"><span class="pre">status</span></code> to “received”, sets their <code class="docutils literal notranslate"><span class="pre">receive_time</span></code> to the current time, and adds them to a <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">transmission</span> <span class="ow">in</span> <span class="n">pending_transmissions</span><span class="p">:</span>
+    <span class="n">transmission</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;received&quot;</span>
+    <span class="n">transmission</span><span class="o">.</span><span class="n">receive_time</span> <span class="o">=</span> <span class="n">timenow</span><span class="p">()</span>
+    <span class="n">received_transmissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">transmission</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>But, if <code class="docutils literal notranslate"><span class="pre">what</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, then <code class="docutils literal notranslate"><span class="pre">receive()</span></code> tries a couple of other things. First, it sees whether it’s a specific Transmission. If it is, it makes sure that this Transmission has been sent to you and that you haven’t already received it. If this check fails, the program raises an error and stops, but if it passes the Transmission’s status is updated and it’s added to the list of received Transmissions.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what</span><span class="p">,</span> <span class="n">Transmission</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">what</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transmissions</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;incoming&quot;</span><span class="p">,</span>
+                                  <span class="n">status</span><span class="o">=</span><span class="s2">&quot;pending&quot;</span><span class="p">):</span>
+        <span class="n">transmission</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="s2">&quot;received&quot;</span>
+        <span class="n">what</span><span class="o">.</span><span class="n">receive_time</span> <span class="o">=</span> <span class="n">timenow</span><span class="p">()</span>
+        <span class="n">received_transmissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">what</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> cannot receive </span><span class="si">{}</span><span class="s2"> as it is not &quot;</span>
+            <span class="s2">&quot;in its pending_transmissions&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="p">)</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p>If it’s neither <code class="docutils literal notranslate"><span class="pre">None</span></code> nor a specific Transmission then the function just gives up and raises an error. This means that this function is not nearly as flexible as <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> (what if you want to receive a nested list of <code class="docutils literal notranslate"><span class="pre">Transmission</span></code> objects and subclasses of <code class="docutils literal notranslate"><span class="pre">Transmission</span></code>?), but it’s also much simpler as a result and no one has ever needed more complex functionality, so I think we’re ok.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Nodes cannot receive </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">what</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The final thing the function does is extract all the Infos from the received Transmissions and pass them to the function <code class="docutils literal notranslate"><span class="pre">update()</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">([</span><span class="n">t</span><span class="o">.</span><span class="n">info</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">received_transmissions</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>What does <code class="docutils literal notranslate"><span class="pre">update()</span></code> do? I’m glad you asked; it’s the very next function, and the answer is… pretty much nothing. <code class="docutils literal notranslate"><span class="pre">Node.update()</span></code> basically gives Nodes an opportunity to do something automatically as soon as they receive some Transmissions. It gets sent all the Infos the Node has been sent because it’s likely that whatever the Node does is going to depend on what it has been sent. However, because this is probably experiment-specific, by default the function just checks that the Node hasn’t failed, as failed Nodes definitely should not be updating.</p>
+<p>But what kinds of updates might we want? The next couple of functions (and the final functions in the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class!) offer some ideas. The first is <code class="docutils literal notranslate"><span class="pre">replicate()</span></code>. It takes whatever <code class="docutils literal notranslate"><span class="pre">Info</span></code> you’ve been sent and simply makes a copy. The key line is this one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">info_out</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">info_in</span><span class="p">)(</span><span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">contents</span><span class="o">=</span><span class="n">info_in</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It basically says make a new <code class="docutils literal notranslate"><span class="pre">Info</span></code> (<code class="docutils literal notranslate"><span class="pre">info_out</span></code>) of the same kind as the <code class="docutils literal notranslate"><span class="pre">Info</span></code> you were sent (<code class="docutils literal notranslate"><span class="pre">type(info_in)</span></code>), specify that you are the <code class="docutils literal notranslate"><span class="pre">Node</span></code> that’s making this new <code class="docutils literal notranslate"><span class="pre">Info</span></code> (<code class="docutils literal notranslate"><span class="pre">origin=self</span></code>) and give it the same contents as the <code class="docutils literal notranslate"><span class="pre">Info</span></code> you were sent (<code class="docutils literal notranslate"><span class="pre">contents=info_in.contents</span></code>). We don’t need to discuss the rest of the function for now as it won’t make sense until we cover Transformations, so maybe make a note of this and return to it later.</p>
+<p>The other pre-packaged kind of update is <code class="docutils literal notranslate"><span class="pre">mutate()</span></code> but this makes even less sense until we cover Transformations and Infos, so let’s let it be for now.</p>
+</div>
+<div class="section" id="kinds-of-nodes">
+<h2>Kinds of Nodes<a class="headerlink" href="#kinds-of-nodes" title="Permalink to this headline">¶</a></h2>
+<p>Everything covered above concerns the base class <code class="docutils literal notranslate"><span class="pre">Node</span></code>. However, in many instances you’ll want to use something a lot like a <code class="docutils literal notranslate"><span class="pre">Node</span></code>, but with something extra. The most obvious example is that you might want a <code class="docutils literal notranslate"><span class="pre">Node.update()</span></code> function to <em>actually do something</em>. You are free to build your own <code class="docutils literal notranslate"><span class="pre">Node</span></code> sub-types on an experiment-by-experiment basis (and we’ll see an example of that shortly), but Dallinger also comes pre-packaged with a handful of useful <code class="docutils literal notranslate"><span class="pre">Node</span></code> sub-types that we anticipated might be useful. To see these you need to open the file <cite>nodes.py</cite> in the same directory as <cite>models.py</cite> (<cite>Dallinger/dallinger/nodes.py</cite>). Let’s work through the contents of that file now.</p>
+<p>The first kind of <code class="docutils literal notranslate"><span class="pre">Node</span></code> is the <code class="docutils literal notranslate"><span class="pre">Agent</span></code>. Its class definition starts at the following line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Agent</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>This means that the following code defines a new class called <code class="docutils literal notranslate"><span class="pre">Agent</span></code> but because the class <code class="docutils literal notranslate"><span class="pre">Node</span></code> is contained in parentheses, this also informs the program that <code class="docutils literal notranslate"><span class="pre">Agent</span></code> objects <cite>inherit</cite> all of the functionality of the class <code class="docutils literal notranslate"><span class="pre">Node</span></code>. This is handy, because in general we only want to change a couple of things about a <code class="docutils literal notranslate"><span class="pre">Node</span></code> and so by inheriting everything as a baseline we don’t have to recreate all the functionality we wanted to keep. The next line of code tells Dallinger that when <code class="docutils literal notranslate"><span class="pre">Node</span></code> Python objects are translated into database records, the value in their <code class="docutils literal notranslate"><span class="pre">type</span></code> column should be “agent”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;polymorphic_identity&quot;</span><span class="p">:</span> <span class="s2">&quot;agent&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This probably looks quite strange unless you are familiar with the details of databases, but you can see some of the same stuff if you look back at the code in <cite>models.py</cite> where we created the <code class="docutils literal notranslate"><span class="pre">type</span></code> column in the first place:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="c1">#: A String giving the name of the class. Defaults to</span>
+<span class="c1">#: ``node``. This allows subclassing.</span>
+<span class="nb">type</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;polymorphic_on&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+    <span class="s1">&#39;polymorphic_identity&#39;</span><span class="p">:</span> <span class="s1">&#39;node&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>So <code class="docutils literal notranslate"><span class="pre">Agent</span></code> inherits this whole bit of code from the class <code class="docutils literal notranslate"><span class="pre">Node</span></code>, but specifically overwrites the bit called <code class="docutils literal notranslate"><span class="pre">polymorphic_identity</span></code>, changing it from <code class="docutils literal notranslate"><span class="pre">node</span></code> to <code class="docutils literal notranslate"><span class="pre">agent</span></code>.</p>
+<p>The rest of the <code class="docutils literal notranslate"><span class="pre">Agent</span></code> class is kinda funny looking. What it’s doing is setting up Agents to have a property called <code class="docutils literal notranslate"><span class="pre">fitness</span></code>. This is because Agents were created for use in evolutionary simulations, and having a <code class="docutils literal notranslate"><span class="pre">fitness</span></code> property is essential for this. However, remember that everything needs to get stored in the database otherwise it will be forgotten, <em>but</em> there isn’t a column for <code class="docutils literal notranslate"><span class="pre">fitness</span></code>. So what this code does is repurpose the <code class="docutils literal notranslate"><span class="pre">property1</span></code> column for storing <code class="docutils literal notranslate"><span class="pre">fitness</span></code>. What this means is that at run-time you can do things like <code class="docutils literal notranslate"><span class="pre">agent1.fitness</span></code> and it will return the contents of the <code class="docutils literal notranslate"><span class="pre">property1</span></code> column to you instead of just crashing. Obviously you could just use the <code class="docutils literal notranslate"><span class="pre">property1</span></code> column as-is and just remember that you are storing <code class="docutils literal notranslate"><span class="pre">fitness</span></code> values in it, but depending on how forgetful you are that might be a risky strategy. Anyway, here’s how the code works bit by bit. The first chunk lets you ask Agents for their fitness (i.e. <code class="docutils literal notranslate"><span class="pre">agent1.fitness</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@hybrid_property</span>
+<span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Endow agents with a numerical fitness.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">property1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>The next bit allows you to set an Agent’s <code class="docutils literal notranslate"><span class="pre">fitness</span></code> and have it stored in <code class="docutils literal notranslate"><span class="pre">property1</span></code> (so <code class="docutils literal notranslate"><span class="pre">agent1.fitness</span> <span class="pre">=</span> <span class="pre">3.1</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@fitness</span><span class="o">.</span><span class="n">setter</span>
+<span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assign fitness to property1.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">property1</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">fitness</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The last bit allows you to write custom database queries and filter by <code class="docutils literal notranslate"><span class="pre">fitness</span></code>. This is a bit beyond what we are currently interested in so I won’t give an example.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@fitness</span><span class="o">.</span><span class="n">expression</span>
+<span class="k">def</span> <span class="nf">fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieve fitness via property1.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">property1</span><span class="p">,</span> <span class="n">Float</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The next Node type is the <code class="docutils literal notranslate"><span class="pre">ReplicatorAgent</span></code>. Note that it extends the class <code class="docutils literal notranslate"><span class="pre">Agent</span></code>, not <code class="docutils literal notranslate"><span class="pre">Node</span></code>, and so it will come with a <code class="docutils literal notranslate"><span class="pre">fitness</span></code> already:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ReplicatorAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>The only further change it makes (beyond the <code class="docutils literal notranslate"><span class="pre">polymorphic_identity</span></code>) is to override the function <code class="docutils literal notranslate"><span class="pre">update()</span></code> such that all <code class="docutils literal notranslate"><span class="pre">Info</span></code> objects received via Transmissions are immediately copied by the Node, hence we call them <code class="docutils literal notranslate"><span class="pre">ReplicatorAgents</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infos</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replicate the incoming information.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">info_in</span> <span class="ow">in</span> <span class="n">infos</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replicate</span><span class="p">(</span><span class="n">info_in</span><span class="o">=</span><span class="n">info_in</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that in doing this, it’s making use of the function <code class="docutils literal notranslate"><span class="pre">replicate()</span></code> which it inherits from the base class <code class="docutils literal notranslate"><span class="pre">Node</span></code> and which we covered above.</p>
+<p>The next class is the <code class="docutils literal notranslate"><span class="pre">Source</span></code> which extends the class <code class="docutils literal notranslate"><span class="pre">Node</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Source</span><span class="p">(</span><span class="n">Node</span><span class="p">):</span>
+
+    <span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;polymorphic_identity&quot;</span><span class="p">:</span> <span class="s2">&quot;generic_source&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Sources are intended to act as automated information senders in experiments (e.g. some sort of quiz master) and so they have a bunch of useful functions to speed this along. Most of these functions look unfamiliar, except (hopefully) the first:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_what</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;What to transmit by default.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_information</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">_what()</span></code> is called when the Node’s <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> function is sent a <code class="docutils literal notranslate"><span class="pre">what</span></code> argument of <code class="docutils literal notranslate"><span class="pre">None</span></code> and its purpose is to set the default behavior of what is transmitted if nothing is specified (see above for more details). In the class <code class="docutils literal notranslate"><span class="pre">Node</span></code>, <code class="docutils literal notranslate"><span class="pre">_what()</span></code> returns <code class="docutils literal notranslate"><span class="pre">Info</span></code> - i.e. if you don’t specify otherwise a <code class="docutils literal notranslate"><span class="pre">Node</span></code> will transmit all its <code class="docutils literal notranslate"><span class="pre">Info</span></code> objects when asked to transmit. This is different for a <code class="docutils literal notranslate"><span class="pre">Source</span></code> however, and instead the function <code class="docutils literal notranslate"><span class="pre">creation_information()</span></code> is called. The purpose of this function is to create a new <code class="docutils literal notranslate"><span class="pre">Info</span></code> on demand. So if the <code class="docutils literal notranslate"><span class="pre">Source</span></code> is a quiz master, it will create a new question. But for the generic class <code class="docutils literal notranslate"><span class="pre">Source</span></code> to make a new <code class="docutils literal notranslate"><span class="pre">Info</span></code> it needs to know two things: (1) what type of <code class="docutils literal notranslate"><span class="pre">Info</span></code> should I make? And (2) what should its contents be? To answer these questions the type and contents of the Info are farmed out to two other functions, <code class="docutils literal notranslate"><span class="pre">_info_type()</span></code> and <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> (note how functions starting with <code class="docutils literal notranslate"><span class="pre">_</span></code> are used to set default behavior).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_information</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create new infos on demand.&quot;&quot;&quot;</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info_type</span><span class="p">()(</span>
+        <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">contents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_contents</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">info</span>
+
+<span class="k">def</span> <span class="nf">_info_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The type of info to be created.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Info</span>
+
+<span class="k">def</span> <span class="nf">_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The contents of new infos.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.contents() needs to be defined.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">_info_type()</span></code> sends the class <code class="docutils literal notranslate"><span class="pre">Info</span></code>. So if you don’t change this function then the <code class="docutils literal notranslate"><span class="pre">Source</span></code> will create standard Infos. However, the <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> function, by default, raises an error. This is because the generic <code class="docutils literal notranslate"><span class="pre">Source</span></code> has no idea what the contents of its Infos should be and so if you are using it without overriding this function you’ve probably made a mistake.</p>
+<p>The last function of the <code class="docutils literal notranslate"><span class="pre">Source</span></code> class overrides the <code class="docutils literal notranslate"><span class="pre">receive()</span></code> function to raise an error:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">what</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raise an error if asked to receive a transmission.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Sources cannot receive transmissions.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is because <code class="docutils literal notranslate"><span class="pre">Source</span></code> objects, by definition, cannot receive information from other <code class="docutils literal notranslate"><span class="pre">Node</span></code> objects; they are simply information senders. You can send them Transmissions whenever you want (which should be never…) but they cannot receive them. Although, you obviously can overwrite this function again to restore <code class="docutils literal notranslate"><span class="pre">receive()</span></code> to its usual functionality. But then why are you using a <code class="docutils literal notranslate"><span class="pre">Source</span></code>?</p>
+<p>The next class <code class="docutils literal notranslate"><span class="pre">RandomBinaryStringSource</span></code> gives an example of how <code class="docutils literal notranslate"><span class="pre">Source</span></code> can be extended to create <code class="docutils literal notranslate"><span class="pre">Info</span></code> objects with specific contents. A <code class="docutils literal notranslate"><span class="pre">RandomBinaryStringSource</span></code> is one that sends out strings of length two that consist only of 0s and 1s in a random order. Because we are fine for these Infos to be of the base class <code class="docutils literal notranslate"><span class="pre">Info</span></code> we don’t need to overwrite the <code class="docutils literal notranslate"><span class="pre">_info_type()</span></code> function, instead we only need overwrite the <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> function with one that creates the binary strings. Here’s the code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RandomBinaryStringSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A source that transmits random binary strings.&quot;&quot;&quot;</span>
+
+    <span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;polymorphic_identity&quot;</span><span class="p">:</span> <span class="s2">&quot;random_binary_string_source&quot;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_contents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate a random binary string.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>That’s everything for Node. Next we’ll move on to the class <code class="docutils literal notranslate"><span class="pre">Vector</span></code>. Don’t worry things will be easier (and shorter) going forward.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Nodes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-a-node">What is a Node?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-node-table">The Node table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sharedmixin-or-where-are-the-rest-of-my-columns">SharedMixin, or where are the rest of my columns?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#node-objects">Node objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#kinds-of-nodes">Kinds of Nodes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="the_database.html" title="previous chapter">The Database</a></li>
+      <li>Next: <a href="vector.html" title="next chapter">Vectors</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/node.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

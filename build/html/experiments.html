@@ -1,0 +1,306 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Demo Experiment Classes &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="The Experiment Class" href="experiment.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="demo-experiment-classes">
+<h1>Demo Experiment Classes<a class="headerlink" href="#demo-experiment-classes" title="Permalink to this headline">¶</a></h1>
+<p>Now that we’ve seen how the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> works, let’s take a look at how some of the demos that come packaged with Dallinger modify the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> Class to produce their own unique <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> subclasses.</p>
+<p>First, you’ll need to know how to find the demo files. First go to <em>Dallinger/demos/dlgr/demos</em> and in there you should see a bunch of folders that correspond to various different experiments. We’ll go through a few of them now.</p>
+<div class="section" id="bartlett1932">
+<h2>Bartlett1932<a class="headerlink" href="#bartlett1932" title="Permalink to this headline">¶</a></h2>
+<p>This is the first demo we ever made for Dallinger. It was created very early on in development and served as a means for us to test that Dallinger worked at all. As Dallinger development continued the Bartlett1932 code continued to be updated to take advantage of the new functionality we added to Dallinger. As such its a bit like the Ship of Theseus - at some point we’ve changed pretty much every last bit of it, nonetheless, it some senses its as old as Dallinger itself.</p>
+<p>Anyway, so what is Bartlett1932? Well, it’s the Dallinger version of an experiment originally carried out by the British psychologist Frederic Bartlett, and published in his 1932 book remembering. The purpose of the experiment was to explore some of the dynamics of memory and the repeated remembering of information. The structure of the experiment is very similar to the children’s game “telephone” or “Chinese whispers”, though in academic circles its more often called a transmission chain. At the start of the experiment some information was given to a participant, and they wre asked to remember and recall it. Whatever they recalled was then passed on to another participant with the same instructions, and this process was repeated forming a chain of participants. At the end of the chain, the resultant information could be radically different to what was originally provided. In Bartlett’s case he started chains with traditional folk stories.</p>
+<p>The two files we are going to look inside are <em>models.py</em> and <em>experiment.py</em>. Let’s start with <em>models.py</em>.</p>
+<div class="section" id="models-py">
+<h3>models.py<a class="headerlink" href="#models-py" title="Permalink to this headline">¶</a></h3>
+<p>To understand the existence of models.py, remember that all experiments require a new subclass of <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> to be built that overwrites some of the functions in the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class, but that specific experiments might also require the creation of newsubclasses of other Dallinger objects, like Nodes, or Infos. A convention (though one that can be violated if you so wish) is to place the experiment specific subclass of <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> in <em>experiment.py</em> but to place experiment specific subclasses of any other objects in <em>models.py</em>. Bartlett1932 makes one new kind of object, so let’s take a look at it, starting with the class declaration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">WarOfTheGhostsSource</span><span class="p">(</span><span class="n">Source</span><span class="p">):</span>
+<span class="sd">&quot;&quot;&quot;A Source that reads in a random story from a file and transmits it.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The first thing to note is that the newly created class (<code class="docutils literal notranslate"><span class="pre">WarOfTheGhostsSource</span></code>) overwrites the class <code class="docutils literal notranslate"><span class="pre">Source</span></code>, so its immediately going to inherit all the behavior of a Source. You can go back to the Nodes page and re-read the Source bit to catch up, but the short of it is that Sources cannot receive Transmissions and they have some rather complicated behavior associated with their <code class="docutils literal notranslate"><span class="pre">transmit</span></code> function that we’ll cover shortly.</p>
+<p>You might also be wondering why the newly made subclass has such a strange name. Well, ultimately it doesn’t really matter what you call your custom classes (though probably best not to call them names that are already in use like “Info”), but in this case the source is named after one of the folk stories used by Bartlett in his original experiment.</p>
+<p>Next, the class has that rather clunky <code class="docutils literal notranslate"><span class="pre">__mapper_args__</span></code> bit, which, if you can remember, simply tells the database what value to put in the <em>type</em> column of the corresponding table in the database when a WarOfTheGhostsSource is created, in this case its <em>war_of_the_ghosts_source</em>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__mapper_args__</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;polymorphic_identity&quot;</span><span class="p">:</span> <span class="s2">&quot;war_of_the_ghosts_source&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>After this the code overwrites just a single function, <code class="docutils literal notranslate"><span class="pre">_contents()</span></code>. To understand what this function does you really might want to go back an dre-read the seciton on Sources in the Node page. But the short of it is as follows:</p>
+<ol class="arabic simple">
+<li>When Node of any kind (including a Source) is told to <code class="docutils literal notranslate"><span class="pre">transmit()</span></code> the caller can provide arguments telling the Node <em>what</em> to transmit and <em>to_whom</em> to transmit to.</li>
+<li>If <em>what</em> is not specified the Node calls its function <code class="docutils literal notranslate"><span class="pre">_what()</span></code> to check its default behavior.</li>
+<li>For the base class <code class="docutils literal notranslate"><span class="pre">Node</span></code> this returns <code class="docutils literal notranslate"><span class="pre">Info</span></code>, i.e. the Node should transmit all its Infos. But the <code class="docutils literal notranslate"><span class="pre">Source</span></code> class overwrites this, such that <code class="docutils literal notranslate"><span class="pre">_what()</span></code> just calls <code class="docutils literal notranslate"><span class="pre">create_information()</span></code> a new function that only Sources have.</li>
+<li><code class="docutils literal notranslate"><span class="pre">create_information()</span></code> makes a new Info and returns it to <code class="docutils literal notranslate"><span class="pre">_what()</span></code> (which returns it to <code class="docutils literal notranslate"><span class="pre">transmit()</span></code>) so the default behavior of a Source is a transmit a newly made Info.</li>
+<li>But, before <code class="docutils literal notranslate"><span class="pre">create_information()</span></code> makes the Info, it calls two more functions.</li>
+<li>First it calls <code class="docutils literal notranslate"><span class="pre">_info_type()</span></code> to determine what kind of Info it should make. By default this function returns <code class="docutils literal notranslate"><span class="pre">Info</span></code>, but it can be overwritten to return subclasses of <code class="docutils literal notranslate"><span class="pre">Info</span></code>, like <code class="docutils literal notranslate"><span class="pre">Gene</span></code> or <code class="docutils literal notranslate"><span class="pre">Meme</span></code>.</li>
+<li>Next it calls <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> to determine what the contents of the new Info should be. By default this function just raises an error because the contents of the Info is going to be experiment specific and so the user will have to overwrite it according to their experimental needs.</li>
+</ol>
+<p>OK, so with this in mind we can now see what the <code class="docutils literal notranslate"><span class="pre">WarOfTheGhostsSource</span></code> is doing - it’s overwriting <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> to specifcy what the contents of newly made Infos should be when the WarOfTheGhostsSource is asked to transmit but not told what it should transmit. Note that it doesn’t overwrite <code class="docutils literal notranslate"><span class="pre">_info_type()</span></code>, so in this experiment we are happy to send generic Infos.</p>
+<p>Let’s take a look at how the contents is determined. First the sources makes a list called <em>stories</em> and populates it with a bunch of file names (<em>.md</em> is the extension for markdown files), it then chooses one of these stories at random:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stories</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;ghosts.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cricket.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moochi.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;outwit.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;raid.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;species.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tennis.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vagabond.md&quot;</span>
+<span class="p">]</span>
+<span class="n">story</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">stories</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At this point the variable <em>story</em> will contain the name of one of the files from the <em>stories</em> list. After this there’s some quite hard-to-follow code that tells the experiment to actually go find that file and read its contents, then return this to whatever called the <code class="docutils literal notranslate"><span class="pre">_contents()</span></code> function (i.e. the <code class="docutils literal notranslate"><span class="pre">create_information()</span></code> function):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;static/stimuli/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">story</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You’re probably wondering where these stories are, and if you look at the above code you can see their directory: <em>static/stimuli/</em>. So if you look in the Bartlett1932 folder you’ll see another folder called static, within that one called stimuli and within that are the story .md files. Go take a look! These are all the same stories used by Bartlett in the 1930s and so the language is often quite fun.</p>
+<p>At this point you can probably think of some ways to modify the experiment for other purposes. For instance you could change the contents of the <em>.md</em> files to change which stories are sent to participants. You could also create new stories by adding new <em>.md</em> files in the <em>stimuli</em> directory and adding them to the <em>stories</em> list in the <code class="docutils literal notranslate"><span class="pre">WarOfTheGhostsSource</span></code>. Finally, notice that the <code class="docutils literal notranslate"><span class="pre">WarOfTheGhostsSource</span></code> picks a story at random, but maybe you want it to be more deterministic. Let’s say you want to run 8 parallel chains and you want to make sure each chain uses a different story such that each story gets used once and only once. Well, in Dallinger the quickest way to have repeat chains is to have multiple repeat networks (we’ll see this shortly), each of which will contain its own WarOfTheGhostsSource. Because all Networks have a unique <em>id</em> that starts at 1 and counts upward we can use this as an index to pick the appropriate story for each Network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">stories</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;ghosts.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cricket.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;moochi.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;outwit.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;raid.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;species.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;tennis.md&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vagabond.md&quot;</span>
+<span class="p">]</span>
+<span class="n">story</span> <span class="o">=</span> <span class="n">stories</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">network_id</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So, here, in order to decide what story to use the <code class="docutils literal notranslate"><span class="pre">WarOfTheGhostsSource</span></code> looks up its <em>network_id</em> (<code class="docutils literal notranslate"><span class="pre">self.network_id</span></code>) and uses this as an index to pick a story. One must be subtracted from the id because python counts from 0 (i.e. the first story is at index 0).</p>
+</div>
+<div class="section" id="experiment-py">
+<h3>experiment.py<a class="headerlink" href="#experiment-py" title="Permalink to this headline">¶</a></h3>
+<p>OK, let’s open <em>experiment.py</em>. Skip the various imports for now and head straight to the class declaration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Bartlett1932</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Define the structure of the experiment.&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>From this we can see that we’re making a class called <em>Bartlett1932</em> and that it is a subclass of <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>. Note that there’s no <code class="docutils literal notranslate"><span class="pre">__mapper_args__</span></code> funny business this time because there is not Experiment table.</p>
+<p>The first function to be overwritten is <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>, let’s go through it step-by-step. The very first bit looks odd, but is actually quite straightforward:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">super</span><span class="p">(</span><span class="n">Bartlett1932</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is simply the python way of saying “first run the <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> function of the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class”. If you go back to the section on Experiments you’ll see that this mostly just sets a bunch of variables to appropriate values. By calling this we avoid having to duplicate this whole function and we can then just write out the bits that make a <code class="docutils literal notranslate"><span class="pre">Bartlett1932</span></code> differ from an <code class="docutils literal notranslate"><span class="pre">Experiment</span></code>.</p>
+<p>Next <code class="docutils literal notranslate"><span class="pre">Bartlett1932</span></code> imports out <em>models.py</em> page and saves it as the variable <code class="docutils literal notranslate"><span class="pre">self.models</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">models</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
+</pre></div>
+</div>
+<p>We’ll see this in action shortly when we need to make the WarOfTheGhostsSource.</p>
+<p>Next Bartlett1932 changes the value of <em>self.experiment_repeats</em> and <em>self.initial_recruitment_size</em>. Thee correspond to how many Networks to make and how many participants to start off with, respectively. If you want more Networks increase the value of <em>self.experiment_repeats</em>, but don’t forget to increase <em>self.initial_recruitment_size</em> accordingly otherwise no-one will be recruited for the extra Networks.</p>
+<p>Finally, <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> calls <code class="docutils literal notranslate"><span class="pre">setup()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">session</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Don’t worry too much about what <code class="docutils literal notranslate"><span class="pre">session</span></code> is, but you can think of it as the connection to the database tables. Because the purpose of <code class="docutils literal notranslate"><span class="pre">setup()</span></code> (which we covered in the chapter on the base Experiment class) is to create Networks, the function cannot run properly unless it has access to the database tables in order to create the Networks. There is a default <code class="docutils literal notranslate"><span class="pre">setup()</span></code> function in <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> and this does the Network creation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the networks if they don&#39;t already exist.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">practice_repeats</span><span class="p">):</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_network</span><span class="p">()</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s2">&quot;practice&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment_repeats</span><span class="p">):</span>
+            <span class="n">network</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_network</span><span class="p">()</span>
+            <span class="n">network</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s2">&quot;experiment&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>but <code class="docutils literal notranslate"><span class="pre">Bartlett1932</span></code> overrides this as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Setup the networks.</span>
+
+<span class="sd">    Setup only does stuff if there are no networks, this is so it only</span>
+<span class="sd">    runs once at the start of the experiment. It first calls the same</span>
+<span class="sd">    function in the super (see experiments.py in dallinger). Then it adds a</span>
+<span class="sd">    source to each network.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">():</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Bartlett1932</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">net</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">WarOfTheGhostsSource</span><span class="p">(</span><span class="n">network</span><span class="o">=</span><span class="n">net</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So, first we can see that although <code class="docutils literal notranslate"><span class="pre">Bartlett1932</span></code> overrides the function, the first thing it does is call its <em>super</em> (the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class) and run its setup function anyway. This makes sure the Networks are created in the usual fashion. The onyl difference is that after this Bartlett1932 goes though each network and adds a WarOfTheGhostsSource to it. Note how it’s using <code class="docutils literal notranslate"><span class="pre">self.models</span></code> to access the WarOfTheGhostsSource, this relies on the import we discussed earlier.</p>
+<p>Not, remember that when the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class runs its <code class="docutils literal notranslate"><span class="pre">setup()</span></code> function (which is called by Bartlett1932’s <code class="docutils literal notranslate"><span class="pre">setup()</span></code> function) it calls the <code class="docutils literal notranslate"><span class="pre">create_network()</span></code> function to determine what sort of Network it should be making. By default, the base Experiment class makes an Empty Network, but this is no good for Bartlett which needs a Chain. Accordingly, the <code class="docutils literal notranslate"><span class="pre">create_network()</span></code> function is also overwritten:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def create_network(self):</dt>
+<dd>“”“Return a new network.”“”
+return Chain(max_size=5)</dd>
+</dl>
+</div></blockquote>
+<p>Note that the max_size of the Chain is set to 5, which includes the Source. If you want longer chains you would need to change this value.</p>
+<p>The next function is <code class="docutils literal notranslate"><span class="pre">add_node_to_network()</span></code>. A minimal version of this function already exists in the base <code class="docutils literal notranslate"><span class="pre">Experiment</span></code> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add_node_to_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add a node to a network.</span>
+
+<span class="sd">    This passes `node` to :func:`~dallinger.models.Network.add_node()`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>From the chapter on Networks you may be able to remember that each type of Network has a function that defines how it grows as each Node is added. This function is called <code class="docutils literal notranslate"><span class="pre">add_node()</span></code> and as you can see the function of <code class="docutils literal notranslate"><span class="pre">add_node_to_network()</span></code> in the base Experiment class is simply to call this function. For a quick reminder, here’s the <code class="docutils literal notranslate"><span class="pre">add_node()</span></code> function from the <code class="docutils literal notranslate"><span class="pre">Chain</span></code> Network:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add an agent, connecting it to the previous node.&quot;&quot;&quot;</span>
+    <span class="n">other_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Source</span><span class="p">)</span> <span class="ow">and</span> <span class="n">other_nodes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s2">&quot;Chain network already has a nodes, &quot;</span>
+            <span class="s2">&quot;can&#39;t add a source.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">other_nodes</span><span class="p">:</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">other_nodes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;creation_time&#39;</span><span class="p">))</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">whom</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>While this function correctly adds the new Node to the end of the Chain, it is missing one key thing necessary for Bartlett1932: it doesn’t transmit the story recalled by the previous Node to the new Node. Accordingly, Bartlett1932 edits <code class="docutils literal notranslate"><span class="pre">add_node_to_network()</span></code> to add this functionality:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add_node_to_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">network</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add node to the chain and receive transmissions.&quot;&quot;&quot;</span>
+    <span class="n">network</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;from&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parents</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">transmit</span><span class="p">()</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">receive</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>So, first this function adds the Node in the usual fashion. It then gets the previous Node in the Chain (the “parent”) by asking the new Node for a list of its neighbors and taking the 0th Node in this list (there will only ever be one neighbor). In then tells the parent to transmit. Note that we don’t need to specify <em>what</em> or <em>to_whom</em>. The former defaults to <code class="docutils literal notranslate"><span class="pre">Info</span></code> (i.e. all Infos the parent has made) but thye have only made one - their recollection of the story - so that is the only thing that gets sent. Meanwhile, <em>to_whom</em> defaults to <code class="docutils literal notranslate"><span class="pre">Node</span></code> (i.e. all Nodes you have a connection to) and the new Node is the only Node the parent has a connection to.</p>
+<p>The last function of <code class="docutils literal notranslate"><span class="pre">Bartlett1932</span></code> is <code class="docutils literal notranslate"><span class="pre">recruit()</span></code>. Again, the base Experiment class has this function, but it defaults to never recruiting. For Bartlett 1932 this needs to be different, when each participant finishes we need to recruit the next one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">recruit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recruit one participant at a time until all networks are full.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">networks</span><span class="p">(</span><span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recruiter</span><span class="o">.</span><span class="n">recruit</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recruiter</span><span class="o">.</span><span class="n">close_recruitment</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that this function would work even if you had multiple Networks, but it would be slow because you would only have one participant taking part at a time. To improve the efficiency of your experiment you would want to have one participant active in each Network at any given time. There are a couple of ways you could do this,</p>
+<p>Option 1:
+1. Increase <em>initial_recruitment_size</em> to the same value as the number of Networks
+2. Leave recruitment as it is, recruiting one more participant after each one finishes.</p>
+<p>Option 2:
+1. Increase <em>initial_recruitment_size</em> to the same value as the number of Networks
+2. Change recruitment so you recruit participants in batches the same size as the number of Networks, recruiting each batch after everyone in the previous batch has finished.</p>
+<p>Option 1 is maximally efficient, but it becomes very difficult to make sure two participants don’t get put in the same Network at the same time. Option 2 is easier to implement, but a little inefficient.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Demo Experiment Classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bartlett1932">Bartlett1932</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="experiment.html" title="previous chapter">The Experiment Class</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/experiments.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
