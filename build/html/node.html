@@ -37,7 +37,7 @@
 <h1>Nodes<a class="headerlink" href="#nodes" title="Permalink to this headline">¶</a></h1>
 <p>Nodes are one type of object created by Dallinger. They have their own dedicated table in the database, and because they are probably the objects with which you’ll interact the most, we’ll examine them first.</p>
 <div class="figure">
-<img alt="" src="_static/class_chart.jpg" />
+<img alt="" src="_images/class_chart.jpg" />
 </div>
 <div class="section" id="what-is-a-node">
 <h2>What is a Node?<a class="headerlink" href="#what-is-a-node" title="Permalink to this headline">¶</a></h2>
@@ -195,7 +195,7 @@
 </pre></div>
 </div>
 <p>In a more human language this corresponds to “Please do a search over the Vector table returning only those rows where the failed column contains False AND either the destination_id column OR origin_id column contains the same number as the id of the Node”. Pretty elaborate! It’s methods such as these that will allow you to write quite complex experiments in remarkably few lines of code - you just need to learn about them first. As a note, observe that table queries by default don’t ignore failed rows (we had to ask the query to only return not failed rows), so if you ever do start writing out queries the long way instead of using Dallinger’s handy shortcuts don’t forget to add this.</p>
-<p>The next few functions are just other queries over the tables in the database but with wrappers that make them nicer to use. As you read the following you should try to figure out how the code is doing what it does. You should also compare this with the more technical documentation <span class="xref std std-ref">here</span> as down the line you’ll want to work from the documentation or code itself, and not from this more cumbersome guide.</p>
+<p>The next few functions are just other queries over the tables in the database but with wrappers that make them nicer to use. As you read the following you should try to figure out how the code is doing what it does. You should also compare this with the more technical documentation available from the main Dallinger website as down the line you’ll want to work from the documentation or code itself, and not from this more cumbersome guide.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Node.neighbors()</span></code> will return a list of Nodes that the central Node has a connection to. Let’s say you want to offer a participant a choice of other participants who they can ask for help. <code class="docutils literal notranslate"><span class="pre">Node.neighbors()</span></code> is really useful for this, as it gives a list of all other Nodes the participant’s Node is currently connected to and so are available to help. If you look at the function you can see it accepts the parameters <code class="docutils literal notranslate"><span class="pre">direction</span></code> and <code class="docutils literal notranslate"><span class="pre">type</span></code>. These tell the query to look only for neighbors of a certain type (e.g. bots, or agents etc.) or connected to the focal Node in a certain direction (Vectors are directional so there might be a Vector from A to B, but not from B to A). You’ve probably also noticed that the function can take a parameter called <code class="docutils literal notranslate"><span class="pre">failed</span></code> but further inspection of the code shows it will raise an error if you try to use this parameter - I’ll leave it up to you to read the code to see why this is.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Node.is_connected()</span></code> looks for a Vector between two specific Nodes. Again, a direction parameter allows you to specify whether you’re looking for a connection from A to B, or to B from A, or both.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Node.infos()</span></code> gets all the Infos made by a Node of a specified <cite>type</cite>.</p>
@@ -624,6 +624,8 @@
 <li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
 <li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
 </ul>
 
 <div class="relations">

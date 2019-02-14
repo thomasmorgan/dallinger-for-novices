@@ -22,9 +22,7 @@ Dallinger for Programming Novices
    question
    experiment
    experiments
-
-
-.. dummies_experiment_bartlett
+   communication
 .. dummies_experiment_rogers
 .. dummies_experiment_chatroom
 .. dummies_experiment_base
