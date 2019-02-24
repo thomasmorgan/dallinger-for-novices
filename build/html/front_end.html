@@ -1,0 +1,271 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Front end files &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dallinger’s Javascript library" href="dallinger2.html" />
+    <link rel="prev" title="Server Routes" href="routes.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="front-end-files">
+<h1>Front end files<a class="headerlink" href="#front-end-files" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div>Note: before proceeding past this point it is recommended that you learn a little bit about HTML, css and javascript. Enough to know the basics of using each language, and what they are used for in basic web design. If you don’t have this knowledge I strongly suggest finding some online tutorials to give you a quick introduction.</div></blockquote>
+<p>Back in the early days of Dallinger, Dallinger itself was just a back end with routes. The front-end, including how participants could send requests to routes, was left entirely up to the experimenter to design and create. This was for a couple of reasons. A pragmatic one was that we were sufficiently busy building the back-end that we didn’t have time to think about front-end support. But we were also interested in keeping Dallinger as open as possible and didn’t want to inadvertently place any constraints on possible front ends that users might want to build. A final reason, that I think was more important to me than to most of the other devs, was that I didn’t want to hide any of the complexity of Dallinger. In order to create a working front end from scratch you need a good knowledge of Dallinger, and if we gave users too much help they might try to get cracking without a firm grounding in how Dallinger works. This would be ok in the short term, but my concern was that it could lead to users making errors and underestimating the range of experimental designs that Dallinger supports.</p>
+<p>To a large extent this vision of Dallinger (powerful, but with a nasty learning curve) remains accurate (hence why I’m writing docs like these). For instance, things like drag-and-drop UI builders are nowhere to be found (yet, at least). Nonetheless, Dallinger does provide some front end support. This takes the form of a handful of html files and a javascript library. Collectively these can make the experimenter’s job of building a new experiment much easier. Moreover, they don’t reduce Dallinger’s scope becuse they are all entirely optional. A user is entirely free to ignore them and genuinely build a front end from scratch. But after creating several Dallinger experiments we noticed a common pattern of shared code that it just make sense to make available across all experiments. We’ll go through the javascript library in the next chapter, but for now we’ll do a quick tour of the other files.</p>
+<div class="section" id="dallinger-frontend">
+<h2>Dallinger/frontend<a class="headerlink" href="#dallinger-frontend" title="Permalink to this headline">¶</a></h2>
+<p>To see all the front end files that are made available to experiments you should navigate inside <cite>Dallinger/dallinger/frontend</cite>. When you run an experiment, either locally with <code class="docutils literal notranslate"><span class="pre">dallinger</span> <span class="pre">debug</span></code> or live with <code class="docutils literal notranslate"><span class="pre">dallinger</span> <span class="pre">deploy</span></code>, the contents of this folder are copied in to your experiment directory. So they’re there whether or not you want them. That said if your experiment contains any files with the same names as the shared Dallinger files, your versions will “win” (but a warning that you are conflicting with some of the shared files will be printed in the terminal just so you know its happening).</p>
+<p>Inside <cite>frontend</cite> are two more folders: <cite>static</cite> and <cite>templates</cite>. This is exactly the same structure we see inside most experiments and that we covered way back in the section on Experiment structure. The <cite>static</cite> directory contains four things:</p>
+<ol class="arabic simple">
+<li>A folder called <cite>scripts</cite> which contains the dallinger javascript library as well as some other libraries required by the dallinger library.</li>
+<li>A folder called <cite>css</cite> this contains the dallinger.css style sheet that can give your web pages a basic, but decent look.</li>
+<li>A folder called <cite>images</cite> that contains nothing other than the icon that will appear on the tab in users browsers.</li>
+<li>A file called <cite>robots.txt</cite>. This is provided to any search engine bots that happen to stumble in to your experiment as it runs.</li>
+</ol>
+<p>The <cite>templates</cite> folder contains a series of html files (and a bunch more in a folder called <cite>base</cite>) that can act as templates for your later web pages, we’ll go through a few of these now.</p>
+</div>
+<div class="section" id="layout-html">
+<h2>Layout.html<a class="headerlink" href="#layout-html" title="Permalink to this headline">¶</a></h2>
+<p>Let’s start by opening the layout.html page. Upon inspection you might be a little disappointed as all it contains is the following line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;base/layout.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>What this line means is that this file inherits all the contents of the file <cite>base/layout.html</cite>. It’s a form of inheritance. Just like how the <code class="docutils literal notranslate"><span class="pre">Agent</span></code> class in the back end extends the <code class="docutils literal notranslate"><span class="pre">Node</span></code> class with the statement <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Agent(Node)</span></code> and thereby gets access to all its functionality.</p>
+<p>So if we want to understand what <cite>layout.html</cite> does we’ll need to open <cite>base/layout.html</cite>. If you do that now you’ll see a bunch of html. This provides a very basic structure to a page. For instance it has a title containing the word “Experiment”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">%</span><span class="p">}</span><span class="n">Experiment</span><span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The code in curly brackets is a way of labelling sections (a.k.a. “blocks”) of code. So, in plain English, this code means “This page has a title that by default contains the word Experiment, and the title can be referred to with the word ‘title’”. Setting up blocks like this allows other html pages that extent this one to edit certain bits of it very easily. For instance, if we changed <cite>layout.html</cite> (the empty one in templates) so it looked like this, it would create pages that looked just like the base layout page, but with a title of “Amazing Experiment”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;base/layout.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">%</span><span class="p">}</span><span class="n">Amazing</span> <span class="n">Experiment</span><span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p><cite>base/layout.html</cite> also imports the Dallinger css files so, as long as you extend this file (or another file that extends it already, like <cite>layout.html</cite>) you won’t need to import them yourself:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">replace_stylesheets</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">link</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/static/css/bootstrap.min.css&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">link</span> <span class="n">rel</span><span class="o">=</span><span class="s2">&quot;stylesheet&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;/static/css/dallinger.css&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/css&quot;</span><span class="o">&gt;</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">stylesheets</span> <span class="o">%</span><span class="p">}</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Notice it creates two more blocks (<cite>replace_stylesheets</cite> and <cite>stylesheets</cite>) and you can overwrite these in your own html pages to either list <em>more</em> css files to import (<cite>stylesheets</cite>) or list css files to import <em>instead</em> of the core dallinger ones (<cite>replace_stylesheets</cite>).</p>
+<p>This page also imports the various javascript libraries that dallinger typically needs to function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">libs</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;https://code.jquery.com/jquery-2.2.4.min.js&quot;</span> <span class="n">integrity</span><span class="o">=</span><span class="s2">&quot;sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=&quot;</span> <span class="n">crossorigin</span><span class="o">=</span><span class="s2">&quot;anonymous&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/reqwest.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/reconnecting-websocket.js&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/spin.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/store+json2.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/1.5.1/fingerprint2.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/dallinger2.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Again this is for user convenience: there is a good chance you would want to import these javascript libraries and so its often easier just to have your html pages extend <cite>layout.html</cite> that have to list them all yourself. If you look at the src value of the libraries you can see it points inside <cite>/static/scripts/</cite> and if you go there now you will see all the javascript libraries as individual files.</p>
+<p>The last bit of the file is a block for scripts that by default just checks for ad blockers and warns users that they can interfere with Dallinger experiments.</p>
+</div>
+<div class="section" id="the-advert">
+<h2>The advert<a class="headerlink" href="#the-advert" title="Permalink to this headline">¶</a></h2>
+<p>Let’s look now at <cite>base/ad.html</cite>. This is the page that potential participants see when they are browsing recruitment services like mechanical turk. The first thing to notice is that it extends <cite>layout.html</cite> which means it acquires all the contents of <cite>base/layout.html</cite>. Which isn’t much, but it does mean that this file doesn’t need to import the various css and javascript files handled by <cite>layout.html</cite>.</p>
+<p>The file also includes some css to adjust appearance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">stylesheets</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">style</span><span class="o">&gt;</span>
+        <span class="n">body</span> <span class="p">{</span>
+            <span class="n">padding</span><span class="p">:</span><span class="mi">0</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">margin</span><span class="p">:</span> <span class="mi">0</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">background</span><span class="o">-</span><span class="n">color</span><span class="p">:</span> <span class="n">white</span><span class="p">;</span>
+            <span class="n">color</span><span class="p">:</span> <span class="n">black</span><span class="p">;</span>
+            <span class="n">font</span><span class="o">-</span><span class="n">weight</span><span class="p">:</span> <span class="mi">300</span><span class="p">;</span>
+            <span class="n">font</span><span class="o">-</span><span class="n">size</span><span class="p">:</span> <span class="mi">13</span><span class="n">pt</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">#adlogo {</span>
+            <span class="nb">float</span><span class="p">:</span> <span class="n">right</span><span class="p">;</span>
+            <span class="n">width</span><span class="p">:</span> <span class="mi">140</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">padding</span><span class="p">:</span> <span class="mi">2</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">border</span><span class="p">:</span> <span class="n">none</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="c1">#container-not-an-ad {</span>
+            <span class="n">position</span><span class="p">:</span> <span class="n">absolute</span><span class="p">;</span>
+            <span class="n">top</span><span class="p">:</span> <span class="mi">0</span><span class="n">px</span><span class="p">;</span> <span class="o">/*</span> <span class="n">Header</span> <span class="n">Height</span> <span class="o">*/</span>
+            <span class="n">bottom</span><span class="p">:</span> <span class="mi">0</span><span class="n">px</span><span class="p">;</span> <span class="o">/*</span> <span class="n">Footer</span> <span class="n">Height</span> <span class="o">*/</span>
+            <span class="n">left</span><span class="p">:</span> <span class="mi">0</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">right</span><span class="p">:</span> <span class="mi">0</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">padding</span><span class="p">:</span> <span class="mi">100</span><span class="n">px</span><span class="p">;</span>
+            <span class="n">padding</span><span class="o">-</span><span class="n">top</span><span class="p">:</span> <span class="mi">5</span><span class="o">%</span><span class="p">;</span>
+            <span class="n">border</span><span class="p">:</span> <span class="mi">18</span><span class="n">px</span> <span class="n">solid</span> <span class="c1">#f3f3f3;</span>
+            <span class="n">background</span><span class="p">:</span> <span class="n">white</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="o">&lt;/</span><span class="n">style</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>It also modifies the script block to include the following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">scripts</span> <span class="o">%</span><span class="p">}</span>
+<span class="o">&lt;</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="n">function</span> <span class="n">openwindow</span><span class="p">(</span><span class="n">event</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;{{ server_location }}/consent?recruiter={{ recruiter }}&amp;hit_id={{ hitid }}&amp;assignment_id={{ assignmentid }}&amp;worker_id={{ workerid }}&amp;workerId={{ workerid }}&amp;mode={{ mode }}&#39;</span><span class="p">,</span><span class="s1">&#39;Popup&#39;</span><span class="p">,</span><span class="s1">&#39;toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width=&#39;</span><span class="o">+</span><span class="mi">1024</span><span class="o">+</span><span class="s1">&#39;,height=&#39;</span><span class="o">+</span><span class="mi">768</span><span class="o">+</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+        <span class="n">event</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">document</span><span class="o">.</span><span class="n">getElementById</span><span class="p">(</span><span class="s2">&quot;begin-button&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">onclick</span> <span class="o">=</span> <span class="n">openwindow</span><span class="p">;</span>
+<span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This is a little hard to follow, but it defines a new function called <cite>openwindow</cite> and then assigns it to the page element with the id <cite>begin-button</cite>. We’ll see below that the <cite>begin-button</cite> is a button with the word “Begin” written on it. Morevoer, if you look at the <cite>openwindow</cite> function you can see it directs the brower to the <cite>/consent</cite> route, so if a participant clicks “Begin” they get sent to our consent page.</p>
+<p>This code is actually much uglier than what you will mostly be dealing with, and this is because the advert is embedded inside an iframe within the recruiting service’s own webpage and for security reasons they block the importing of javascript libraries so we have to write out code long hand. Once participants get to the consent page the experiment will be open in a tab all of its own and so this constraint will be lifted.</p>
+<p>The rest of the html page actually determines what participants see. If they don’t yet have an <cite>assignment id</cite> (i.e. they have not yet accepted the HIT on MTurk) they see an advert:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="n">assignmentid</span> <span class="o">==</span> <span class="s2">&quot;ASSIGNMENT_ID_NOT_AVAILABLE&quot;</span> <span class="o">%</span><span class="p">}</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">no_assignment</span> <span class="o">%</span><span class="p">}</span>
+        <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Call</span> <span class="k">for</span> <span class="n">participants</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+            <span class="n">The</span> <span class="n">XXX</span> <span class="n">Lab</span> <span class="n">at</span> <span class="n">XXXXX</span> <span class="n">University</span> <span class="ow">is</span> <span class="n">looking</span> <span class="k">for</span> <span class="n">online</span> <span class="n">participants</span>
+            <span class="k">for</span> <span class="n">a</span> <span class="n">brief</span> <span class="n">psychology</span> <span class="n">experiment</span><span class="o">.</span> <span class="n">The</span> <span class="n">only</span> <span class="n">requirements</span>
+            <span class="n">are</span> <span class="n">that</span> <span class="n">you</span> <span class="n">are</span> <span class="n">at</span> <span class="n">least</span> <span class="mi">18</span> <span class="n">years</span> <span class="n">old</span> <span class="ow">and</span> <span class="n">are</span> <span class="n">a</span> <span class="n">fluent</span> <span class="n">English</span>
+            <span class="n">speaker</span><span class="o">.</span>  <span class="n">The</span> <span class="n">task</span> <span class="n">will</span> <span class="n">take</span> <span class="n">XXXXX</span> <span class="n">minutes</span> <span class="ow">and</span> <span class="n">will</span> <span class="n">pay</span> <span class="n">XXXXX</span><span class="o">.</span>
+        <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+            <span class="n">Please</span> <span class="n">click</span> <span class="n">the</span> <span class="s2">&quot;Accept HIT&quot;</span> <span class="n">button</span> <span class="n">on</span> <span class="n">the</span> <span class="n">Amazon</span> <span class="n">site</span>
+            <span class="n">above</span> <span class="n">to</span> <span class="n">begin</span> <span class="n">the</span> <span class="n">task</span><span class="o">.</span>
+        <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="n">no_assignment</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Note that the contents is within the block <cite>no_assignment</cite> so you can extend <cite>base/ad.html</cite> and overwrite just this block to customize the advert text.</p>
+<p>But if an <cite>assignment id</cite> is available (so the participant has accepted the HIT on MTurk) the display changes to show a “thanks for taking part” message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="k">else</span> <span class="o">%</span><span class="p">}</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">live</span> <span class="o">%</span><span class="p">}</span>
+        <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Thanks</span> <span class="k">for</span> <span class="n">accepting</span> <span class="n">this</span> <span class="n">HIT</span><span class="o">.&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+            <span class="n">By</span> <span class="n">clicking</span> <span class="n">the</span> <span class="n">following</span> <span class="n">URL</span> <span class="n">link</span><span class="p">,</span> <span class="n">you</span> <span class="n">will</span> <span class="n">be</span> <span class="n">taken</span> <span class="n">to</span> <span class="n">the</span> <span class="n">experiment</span><span class="p">,</span>
+            <span class="n">including</span> <span class="n">complete</span> <span class="n">instructions</span> <span class="ow">and</span> <span class="n">an</span> <span class="n">informed</span> <span class="n">consent</span> <span class="n">agreement</span><span class="o">.</span>
+        <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;alert alert-warning&quot;</span><span class="o">&gt;</span>
+            <span class="o">&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="ne">Warning</span><span class="o">&lt;/</span><span class="n">b</span><span class="o">&gt;</span><span class="p">:</span> <span class="n">Please</span> <span class="n">disable</span> <span class="n">pop</span><span class="o">-</span><span class="n">up</span> <span class="n">blockers</span> <span class="n">before</span> <span class="n">continuing</span><span class="o">.</span>
+        <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+        <span class="o">&lt;</span><span class="n">button</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;begin-button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary btn-lg&quot;</span><span class="o">&gt;</span>
+        <span class="n">Begin</span> <span class="n">Experiment</span>
+        <span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="n">live</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endif</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Again, this is given a block name, so it can be overwritten.</p>
+<p>At this point you might want to look at <cite>base/consent.html</cite> as its broadly similar in terms of how it works. You can also look at the other templates. <cite>error.html</cite> is what participants are shown when a server error occurs (this indicates a bug in your experiment, but its good practice to show participants a friendly message letting them know!). <cite>complete.html</cite> and <cite>thanks.html</cite> are pages commonly shown at the end of experiments when everything is done.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_structure.html">Experiment structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routes.html">Server Routes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Front end files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dallinger-frontend">Dallinger/frontend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#layout-html">Layout.html</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-advert">The advert</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dallinger2.html">Dallinger’s Javascript library</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="routes.html" title="previous chapter">Server Routes</a></li>
+      <li>Next: <a href="dallinger2.html" title="next chapter">Dallinger’s Javascript library</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/front_end.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

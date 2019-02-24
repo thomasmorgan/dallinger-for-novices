@@ -1,0 +1,264 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Dallinger’s Javascript library &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Front end files" href="front_end.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="dallinger-s-javascript-library">
+<h1>Dallinger’s Javascript library<a class="headerlink" href="#dallinger-s-javascript-library" title="Permalink to this headline">¶</a></h1>
+<p>In the previous section we saw that dallinger comes with a range of front-end files that get added to your experiment at run time. These are intended to help you make functional experiments more quickly than would otherwise be the case. We walked through some of the html files, but the real utility, the bit that will save you the most time, is dallingers javascript library <cite>dallinger2.js</cite> (its called <cite>dallinger2</cite> because it replaced an earlier <cite>dallinger.js</cite>). In this section we’ll walk through some of the key functions that this library provides, so get it open now (<cite>Dallinger/dallinger/frontend/static/scripts/dallinger2.js</cite>) and we’ll get cracking.</p>
+<div class="section" id="sending-requests">
+<h2>Sending requests<a class="headerlink" href="#sending-requests" title="Permalink to this headline">¶</a></h2>
+<p>Probably the nicest thing about the <cite>dallinger2</cite> js library is that it provides a function that masks most of the detail of sending requests from the front end to the back end. The base function is <cite>ajax</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>var ajax = function (method, route, data) {
+    var deferred = $.Deferred();
+    var options = {
+      url: route,
+      method: method,
+      type: &#39;json&#39;,
+      success: function (resp) { deferred.resolve(resp); },
+      error: function (err) {
+        console.log(err);
+        var rejection = dlgr.AjaxRejection(
+          {&#39;route&#39;: route, &#39;method&#39;: method, &#39;data&#39;: data, &#39;error&#39;: err}
+        );
+        deferred.reject(rejection);
+      }
+        };
+        if (data !== undefined) {
+          options.data = data;
+        }
+        reqwest(options);
+        return deferred;
+};
+</pre></div>
+</div>
+<p>You really don’t need to understand this function in detail, but you atleast need a sense of hot it works. First, note that it takes three arguments:</p>
+<ol class="arabic simple">
+<li><cite>method</cite> is what route method you want to use, i.e. <cite>get</cite> or <cite>post</cite>.</li>
+<li><cite>route</cite> is the address of the route, e.g. <cite>node/5/neighbors</cite> for the neighbors of node 5.</li>
+<li><cite>data</cite> is something we haven’t seen much of yet, but we’ll see later that its a way to bundle additional information into the request, things like <cite>contents</cite> for Info post requests.</li>
+</ol>
+<p>The rest of the code simply executes this request. Note also that at the end it returns the output of the request to whatever called the function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">deferred</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>where <cite>deferred</cite> is the request object (I am not sure why it is called deferred, but it doesn’t really matter). So, to summarize, this function allows user created experiments to send requests very quickly. Let’s say you do want to get the neighbors of Node 5. With <cite>dallinger2</cite> imported you only need to do this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dallinger</span><span class="o">.</span><span class="n">ajax</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="s1">&#39;node/5/neighbors&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that here we are not specifying anything for the <cite>data</cite> argument, and we call the <cite>dallinger2</cite> libarary by appending <code class="docutils literal notranslate"><span class="pre">dallinger.</span></code> to the front of the command (and not <code class="docutils literal notranslate"><span class="pre">dallinger2.</span></code>). Here’s another example where we are sending a request to create a new Info:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dallinger</span><span class="o">.</span><span class="n">ajax</span><span class="p">(</span><span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="s1">&#39;info/5&#39;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;contents&quot;</span><span class="p">:</span> <span class="s2">&quot;hello!&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>This sends a request to have Node 5 make an Info with the contents “hello!”. But things get even nicer. Because <cite>get</cite> and <cite>post</cite> requests are very common, <cite>dallinger2</cite> provides handy wrappers for both:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">dlgr</span><span class="o">.</span><span class="n">get</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">ajax</span><span class="p">(</span><span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="n">dlgr</span><span class="o">.</span><span class="n">post</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">ajax</span><span class="p">(</span><span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>You should be able to see that these are very basic wrappers around the <cite>ajax</cite> function that fill in the method for you. So with these, the above request to make an Info can be replaced with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dallinger</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;info/5&#39;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;contents&quot;</span><span class="p">:</span> <span class="s2">&quot;hello!&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>In fact <cite>dallinger2</cite> goes even further with wrappers for common types of requests. So there’s the function <cite>createAgent</cite> to send a Node post request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">dlgr</span><span class="o">.</span><span class="n">createAgent</span> <span class="o">=</span> <span class="n">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/node/&#39;</span> <span class="o">+</span> <span class="n">dallinger</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">participantId</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>So now you can send a request to create a Node simply by executing <code class="docutils literal notranslate"><span class="pre">dallinger.createAgent()</span></code>. You might be wondering what <code class="docutils literal notranslate"><span class="pre">dallinger.identity</span></code> is and we’ll cover that shortly in the subsection on <code class="docutils literal notranslate"><span class="pre">createParticipant</span></code>. There are other handy functions too: <code class="docutils literal notranslate"><span class="pre">createInfo</span></code> sends an Info post request:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">dlgr</span><span class="o">.</span><span class="n">createInfo</span> <span class="o">=</span> <span class="n">function</span> <span class="p">(</span><span class="n">nodeId</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/info/&#39;</span> <span class="o">+</span> <span class="n">nodeId</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>If you look through the rest of the file you’ll see there are other similar functions to get Infos, get received Infos, get incoming Transmissions, get Experiment properties, and so on. Some of the functions are bigger than others though, so we’ll look through a couple of them now.</p>
+</div>
+<div class="section" id="create-participant">
+<h2>Create participant<a class="headerlink" href="#create-participant" title="Permalink to this headline">¶</a></h2>
+<p>In the previous chapter we saw there is a server route (<cite>/participant/</cite>) that can be pinged to prompt the creation of Participant objects. One the front-end side <cite>dallinger2.js</cite> includes the function <cite>createParticipant()</cite> that can be called to send a request to this route. But, its a bit more complicated that the other functions we’ve just been looking at, so let’s go through it more carefully. We’re not going to go through every line though, a lot of the code is a bit beyond what you need to know.</p>
+<p>The first important bit is where the function gets the various parameters needed for participant creation, and uses them to create the route address:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">hit_params</span> <span class="o">=</span> <span class="n">get_hit_params</span><span class="p">();</span>
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/participant/&quot;</span> <span class="o">+</span> <span class="n">hit_params</span><span class="o">.</span><span class="n">worker_id</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">hit_params</span><span class="o">.</span><span class="n">hit_id</span> <span class="o">+</span>
+  <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">hit_params</span><span class="o">.</span><span class="n">assignment_id</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">hit_params</span><span class="o">.</span><span class="n">mode</span> <span class="o">+</span> <span class="s2">&quot;?fingerprint_hash=&quot;</span> <span class="o">+</span>
+  <span class="p">(</span><span class="n">hit_params</span><span class="o">.</span><span class="n">fingerprint_hash</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&amp;recruiter=&#39;</span> <span class="o">+</span> <span class="n">hit_params</span><span class="o">.</span><span class="n">recruiter</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The function <cite>get_hit_params()</cite> is what loads the parameters, and they are originally sent to the participants machine by the recruitment service (i.e. mechanical turk) itself.</p>
+<p>Next the function uses the <cite>post()</cite> function to actually send the request and opens a <code class="docutils literal notranslate"><span class="pre">done</span></code> function that dictates what the function should do <cite>once the request has completed</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dlgr</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">done</span><span class="p">(</span><span class="n">function</span> <span class="p">(</span><span class="n">resp</span><span class="p">)</span> <span class="p">{</span>
+</pre></div>
+</div>
+<p>The next thing it does is save the <cite>participant id</cite> to the local variable <code class="docutils literal notranslate"><span class="pre">dallinger.identity</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    $(&#39;.btn-success&#39;).prop(&#39;disabled&#39;, false);
+dlgr.identity.participantId = resp.participant.id;
+</pre></div>
+</div>
+<p>This is pretty much all the important stuff. The rest of the function checks how many other participants have arrived to determine if quorum has been reached, but we don’t need to worry about that for now. So, to summarize, the create participant function does the following:</p>
+<ol class="arabic simple">
+<li>load the parameters that originally came from MTurk</li>
+<li>create the url and send the request</li>
+<li>save the result in the dallinger.identity variable</li>
+</ol>
+</div>
+<div class="section" id="submitting-the-questionnaire-and-assignment">
+<h2>Submitting the Questionnaire and Assignment<a class="headerlink" href="#submitting-the-questionnaire-and-assignment" title="Permalink to this headline">¶</a></h2>
+<p>The other functions we’ll look at happen at the very end of the experiment. The first is <code class="docutils literal notranslate"><span class="pre">submitQuestionnaire()</span></code>. This is an optional function that you can call to submit questionnaire data the participant completes during debriefing (i.e. the data is saved in Question objects and not in Infos) provided that your questionnaire follows dallingers expected style (we’ll see examples of this later). The code is pretty abstract though, so I’ll just give you a high level overview. The first bit is what extracts all the questionnaire data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>var formSerialized = $(&quot;form&quot;).serializeArray(),
+        spinner = dlgr.BusyForm(),
+        formDict = {},
+        xhr;
+
+formSerialized.forEach(function (field) {
+        formDict[field.name] = field.value;
+});
+</pre></div>
+</div>
+<p>This data is then sent to the Question post route:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">xhr</span> <span class="o">=</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/question/&#39;</span> <span class="o">+</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">participantId</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">question</span><span class="p">:</span> <span class="n">name</span> <span class="o">||</span> <span class="s2">&quot;questionnaire&quot;</span><span class="p">,</span>
+    <span class="n">number</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">response</span><span class="p">:</span> <span class="n">JSON</span><span class="o">.</span><span class="n">stringify</span><span class="p">(</span><span class="n">formDict</span><span class="p">)</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<p>For simplicity (although somewhat ignoring Dallingers implicit style) this function saves all the data in a single Question object, where the <cite>response</cite> column actually contains a full description of all the questions and answers. After this the <code class="docutils literal notranslate"><span class="pre">submitAssignment()</span></code> function is called:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">xhr</span><span class="o">.</span><span class="n">done</span><span class="p">(</span><span class="n">dlgr</span><span class="o">.</span><span class="n">submitAssignment</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The first thing this function does is ask the server for all the participants details. The front end knows its <cite>participant id</cite>, but in order to submit the assignment back to the recruiter it needs to look back up all its recruiter specific values, things like <cite>worker_id</cite> and so on:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dlgr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/participant/&#39;</span> <span class="o">+</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">participantId</span><span class="p">)</span><span class="o">.</span><span class="n">done</span><span class="p">(</span><span class="n">function</span> <span class="p">(</span><span class="n">resp</span><span class="p">)</span> <span class="p">{</span>
+</pre></div>
+</div>
+<p>Once this request is complete sends another request to the <code class="docutils literal notranslate"><span class="pre">worker_complete</span></code> route:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">dlgr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/worker_complete&#39;</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s1">&#39;participant_id&#39;</span><span class="p">:</span> <span class="n">dlgr</span><span class="o">.</span><span class="n">identity</span><span class="o">.</span><span class="n">participantId</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>If this request completes successfully the participant is sent to the <code class="docutils literal notranslate"><span class="pre">complete</span></code> page that returns them to the recruiters website where they can submit their work and get paid and so on:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">dallinger</span><span class="o">.</span><span class="n">allowExit</span><span class="p">();</span>
+<span class="n">window</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">&quot;/complete&quot;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>And this ends the experiment.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_structure.html">Experiment structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routes.html">Server Routes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="front_end.html">Front end files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dallinger’s Javascript library</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sending-requests">Sending requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-participant">Create participant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#submitting-the-questionnaire-and-assignment">Submitting the Questionnaire and Assignment</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="front_end.html" title="previous chapter">Front end files</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/dallinger2.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

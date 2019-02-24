@@ -1,0 +1,143 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Experiment structure &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The Database" href="the_database.html" />
+    <link rel="prev" title="Introducing the Players" href="the_players.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="experiment-structure">
+<h1>Experiment structure<a class="headerlink" href="#experiment-structure" title="Permalink to this headline">¶</a></h1>
+<p>Before we press on any further I want to take quick detour to the demo experiments. The point is to let you see that the structure we have just talked about (front-end vs back-end, and so on) is manifest in the file structure of each indiviual experiment. So let’s start by navigating to one of the demos, Bartlett1932 which can be found in <cite>Dallinger/demos/dlgr/demos/bartlett1932</cite>. We’ll talk through some of the files and folders now.</p>
+<div class="section" id="the-front-end">
+<h2>The Front-end<a class="headerlink" href="#the-front-end" title="Permalink to this headline">¶</a></h2>
+<p>One of the units in the diagram we saw in the previous chapter was a chunk labelled “front-end”, this is everything that runs on the participants computer. In the file structure of the experiments this code is stored in files found within the folders called <cite>static</cite> and <cite>templates</cite>. The <cite>static</cite> folder is subdivided into <cite>scripts</cite>, <cite>images</cite>, <cite>css</cite> and so on. We don’t need to worry too much about this stuff yet, but these are various resources that your experiment will call on at run time. Probably the most important are the files within the script folder as these determine your experiments behavior (what happens when buttons are clicked and so on). Meanwhile the <cite>templates</cite> folder contains html pages that determine the basic structure of each page (titles, text, button placement and so on). Its worth noting that this structure is neither necessay, nor unique to Dallinger. The division between static and templates is standard practice in web design, but users are free to ignore this and use whatever directory structure they feel like for any individual experiment. Nonetheless, this structure is standard practice for a reason - it works well for more purposes - and so unles you have very specific requirements you will probably want to stick with it.</p>
+</div>
+<div class="section" id="the-back-end">
+<h2>The Back-end<a class="headerlink" href="#the-back-end" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-experiment">
+<h3>The Experiment<a class="headerlink" href="#the-experiment" title="Permalink to this headline">¶</a></h3>
+<p>In the main experiment directory you’ll see a file called <cite>experiment.py</cite>. As you might have guessed this is where the code that creates the experiment goes. You can open it now and have a quick look, but it probably won’t make sense until later (we’ll come back to it in a later chapter anyway). This isn’t the only file that serves this purpose though. There’s also <cite>models.py</cite> which contains code descriptions of customs types of objects (Nodes, Vectors etc) the experiment needs, as well as <cite>config.txt</cite> that contains parameters that control various experiment properties. We’ll come to all these files in due course.</p>
+</div>
+<div class="section" id="the-server-routes">
+<h3>The Server Routes<a class="headerlink" href="#the-server-routes" title="Permalink to this headline">¶</a></h3>
+<p>Server routes were a part of the diagram on the previous page, but they are missing here. This is because the server routes are provided by core Dallinger and so they do not need to be a part of each individual experiment. Nonetheless you can create custom server routes if you really want to, but this is an advanced feature that we’ll come to much later.</p>
+</div>
+<div class="section" id="the-database">
+<h3>The Database<a class="headerlink" href="#the-database" title="Permalink to this headline">¶</a></h3>
+<p>The database appears to be missing too, but again this is because the database structure is determined by the core dallinger code as opposed to being an experiment specific thing.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Experiment structure</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-front-end">The Front-end</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-back-end">The Back-end</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routes.html">Server Routes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="front_end.html">Front end files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dallinger2.html">Dallinger’s Javascript library</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="the_players.html" title="previous chapter">Introducing the Players</a></li>
+      <li>Next: <a href="the_database.html" title="next chapter">The Database</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/file_structure.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

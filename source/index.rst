@@ -11,6 +11,7 @@ Dallinger for Programming Novices
    :caption: Part 2: Understanding Dallinger:
 
    the_players
+   file_structure
    the_database
    node
    vector
@@ -23,11 +24,14 @@ Dallinger for Programming Novices
    experiment
    experiments
    communication
+   routes
+   front_end
+   dallinger2
+
 .. dummies_experiment_rogers
 .. dummies_experiment_chatroom
 .. dummies_experiment_base
 .. dummies_back_end
-.. dummies_routes
 .. dummies_notifications
 .. dummies_front_end
 .. dummies_html_css_js
