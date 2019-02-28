@@ -1,0 +1,390 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Demo Front Ends &#8212; Dallinger for Programming Novices 0.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Dallinger’s Javascript library" href="dallinger2.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="demo-front-ends">
+<h1>Demo Front Ends<a class="headerlink" href="#demo-front-ends" title="Permalink to this headline">¶</a></h1>
+<p>Armored with our knowledge of the shared front-end files, let’s delve back into the demos to see how they use these files, in combination with their own experiement specific code, to get their jobs done. As before we’ll start with the Bartlett1932 demo, so go to <em>Dallinger/demos/dlgr/demos/Bartlett1932</em> and we’ll go from there.</p>
+<div class="section" id="bartlett1932">
+<h2>Bartlett1932<a class="headerlink" href="#bartlett1932" title="Permalink to this headline">¶</a></h2>
+<p>As a quick recap (see the Demo Experiment Classes page for more details), Bartlett1932 is a text-based transmission chain experiment in which participants are shown and then asked to recall short stories, and their recollections are then shown to the next participant. As more participants take part they form a chain.</p>
+<p>In the <cite>/bartlett1932</cite> folder we’ve already gone though <cite>experiment.py</cite> and <cite>models.py</cite>. In this section we’ll go through the folders <cite>static</cite> and <cite>templates</cite> which (if you recall form the previous page) are the conventional names for the folders that store scripts and html pages respectively. Let’s start with the <cite>templates</cite> folder.</p>
+<div class="section" id="templates">
+<h3>Templates<a class="headerlink" href="#templates" title="Permalink to this headline">¶</a></h3>
+<p>There aren’t that many files with <cite>templates</cite>, and once you open them, you’ll see that they don’t contain that much either. We’ll start with <cite>ad.html</cite> which is the page that users see when they are browing for potential things to do on the recuiting service. It turns out that Bartlett’s <cite>ad.html</cite> does nothing other than extend the base <cite>ad.html</cite> from the shared front end files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;base/ad.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You can go back and look at that file if you want, but the base ad is basically a very generic statement inviting the viewer to take part in “a study” with the names of institutions and researchers replaced with XXXXXX. For an actual experiment this would obviously need tweaking, but for a demo packaged with Dallinger its fine.</p>
+<p>The consent page similarly only extends the base consent page, but <cite>layout.html</cite> and <cite>exp.html</cite> do a little bit more. Let’s start with <cite>layout.html</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;base/layout.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">-%</span><span class="p">}</span>
+    <span class="n">Psychology</span> <span class="n">Experiment</span>
+<span class="p">{</span><span class="o">%-</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">libs</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/store+json2.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/markdown.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="p">{{</span> <span class="nb">super</span><span class="p">()</span> <span class="p">}}</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/experiment.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>So the first thing to note is that it extends the base layout page. If you remember from a couple of sections back, the base layout page sets a title, imports some css files and some js files, and checks for adblockers. It also sets up a bunch of code blocks that experiments can modify individually. So right off the bat Bartlett’s layout page gets all this functionality, but we can also see that the next thing it does is change the title:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">-%</span><span class="p">}</span>
+    <span class="n">Psychology</span> <span class="n">Experiment</span>
+<span class="p">{</span><span class="o">%-</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>See how it’s using “blocks” to edit just the title. Here’s the code from the base layout page that sets up the block in the first place:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;</span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">title</span> <span class="o">%</span><span class="p">}</span><span class="n">Experiment</span><span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span><span class="o">&lt;/</span><span class="n">title</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>So the base layout page creates an html <cite>&lt;title&gt;</cite> section, that by default contains the word “Experiment”. But, because it gives it the block name “title”, Bartlett can modify this block to change the contents of the html <cite>&lt;title&gt;</cite> section to “Psychology Experiment”.</p>
+<p>The last thing Bartlett’s <cite>layout.html</cite> page does is add some extra javascript files to import:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">libs</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/store+json2.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/markdown.min.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+    <span class="p">{{</span> <span class="nb">super</span><span class="p">()</span> <span class="p">}}</span>
+    <span class="o">&lt;</span><span class="n">script</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;/static/scripts/experiment.js&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;text/javascript&quot;</span><span class="o">&gt;</span> <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Note again that using referencing a code block in the base layout page and modifying it. It’s using the statement <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">super()</span> <span class="pre">}}</span></code> to mean that the javascript files imported by <cite>base/layout.html</cite> should still be imported, but that the extra ones listed should be imported too. The extra files are “store+json2.min.js” (which is actually imported by the base layout anyway and so doesn’t need to be here), “markdown.min.js” which is a javascript library used to read the stories that are formatted as markdown files and finally “experiment.js” which is Bartlett’s custom javascript file.</p>
+<p>So, Bartlett’s <cite>layout.html</cite> changes the title and adds some extra javascript files to import. As long as the rest of Bartlett’s html files extend <cite>layout.html</cite> (either immediately, or indirectly as in the case of the consent page that extends a page that extends layout) then they will also get these javascript libraries.</p>
+</div>
+<div class="section" id="exp-html">
+<h3>exp.html<a class="headerlink" href="#exp-html" title="Permalink to this headline">¶</a></h3>
+<p>The last html page in this directory is <cite>exp.html</cite> which is where the participants browsers will be pointing when they are actually taking part in the experiment. Like the other pages it extends <cite>layout.html</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s2">&quot;layout.html&quot;</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>After that it changes the “body” block of the page, which is the actual contents of the page (html pages are often split into the body, which is the actual contents, and the header, which is imports and so forth). Here’s the new body code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;main_div&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;stimulus&quot;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Read</span> <span class="n">the</span> <span class="n">following</span> <span class="n">text</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;</span><span class="n">blockquote</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;story&quot;</span><span class="o">&gt;&lt;</span><span class="n">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">loading</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;&lt;/</span><span class="n">blockquote</span><span class="o">&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">button</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;finish-reading&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="n">I</span><span class="s1">&#39;m done reading.&lt;/button&gt;</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;response-form&quot;</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display:none;&quot;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Now</span> <span class="n">reproduce</span> <span class="n">the</span> <span class="n">passage</span><span class="p">,</span> <span class="n">verbatim</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">Note</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">b</span><span class="o">&gt;</span> <span class="n">Your</span> <span class="n">task</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">recreate</span> <span class="n">the</span> <span class="n">text</span><span class="p">,</span> <span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">to</span> <span class="n">the</span> <span class="n">best</span> <span class="n">of</span> <span class="n">your</span> <span class="n">ability</span><span class="o">.&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">textarea</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;reproduction&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">rows</span><span class="o">=</span><span class="s2">&quot;10&quot;</span><span class="o">&gt;&lt;/</span><span class="n">textarea</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">button</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;submit-response&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="n">Submit</span> <span class="n">response</span><span class="o">.&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>First note the whole thing is set within a div called <cite>main_div</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;main_div&quot;</span><span class="o">&gt;</span>
+    <span class="n">contents</span><span class="o">...</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>And the contents of the main_div is further split into two other divs, the “stimiulus” div and the “response-form” div:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;main_div&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;stimulus&quot;</span><span class="o">&gt;</span>
+        <span class="n">stimulus</span> <span class="n">contents</span><span class="o">...</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+
+    <span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;response-form&quot;</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display:none;&quot;</span><span class="o">&gt;</span>
+        <span class="n">response</span><span class="o">-</span><span class="n">form</span> <span class="n">contents</span><span class="o">...</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Note also that the <cite>response-form</cite> div is initially set to be hidden (<code class="docutils literal notranslate"><span class="pre">style=&quot;display:none;&quot;</span></code>). This means that when the page loads the <cite>response-form</cite> won’t be visible to participants, only the <cite>stimulus</cite> will be. Infact when we run through Bartlett in the next seciton you’ll see that the experiment basically switches these two divs on and off as the participant proceeds.</p>
+<p>The <cite>stimulus</cite> div contains a header saying “Read the following text” and then creates a <cite>blockquote</cite> item where the story will appear (its empty by deafult though) and then creates a button called <cite>finish-reading</cite> labelled “I’m done reading”:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;stimulus&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Read</span> <span class="n">the</span> <span class="n">following</span> <span class="n">text</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;</span><span class="n">blockquote</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;story&quot;</span><span class="o">&gt;&lt;</span><span class="n">p</span><span class="o">&gt;&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">loading</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;&lt;/</span><span class="n">blockquote</span><span class="o">&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">button</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;finish-reading&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="n">I</span><span class="s1">&#39;m done reading.&lt;/button&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>So, straight away the participant would see something vaguely like the experiment, just with no story yet shown. You might be wondering what <cite>class=”btn btn-primary”</cite> means in the button code. To understand this requires a few steps:</p>
+<ol class="arabic simple">
+<li>Remember that the base layout.html page imports some css files, and that css controls the general “look-and-feel” of a page.</li>
+<li>One of these files is bootstrap.css, a very common css library that gives a pleasant, if generic, appearance.</li>
+<li>Css changes the appearance of elements according to their classes, and <cite>btn</cite> and <cite>btn-primary</cite> are classes that bootstrap looks for.</li>
+<li><cite>btn</cite> probably does basic button functionality, but I know for a fact that <cite>btn-primary</cite> makes the button blue.</li>
+<li>So by using these classes here we can make sure the button looks perfectly fine (if a little generic) with no further work.</li>
+</ol>
+<p>For more bootstrap see here: <a class="reference external" href="https://getbootstrap.com/docs/3.4/css/">https://getbootstrap.com/docs/3.4/css/</a></p>
+<p>The <cite>response-form</cite> div is structurally pretty similar:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;response-form&quot;</span> <span class="n">style</span><span class="o">=</span><span class="s2">&quot;display:none;&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">Now</span> <span class="n">reproduce</span> <span class="n">the</span> <span class="n">passage</span><span class="p">,</span> <span class="n">verbatim</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;&lt;</span><span class="n">b</span><span class="o">&gt;</span><span class="n">Note</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">b</span><span class="o">&gt;</span> <span class="n">Your</span> <span class="n">task</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">recreate</span> <span class="n">the</span> <span class="n">text</span><span class="p">,</span> <span class="n">word</span> <span class="k">for</span> <span class="n">word</span><span class="p">,</span> <span class="n">to</span> <span class="n">the</span> <span class="n">best</span> <span class="n">of</span> <span class="n">your</span> <span class="n">ability</span><span class="o">.&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">textarea</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;reproduction&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">rows</span><span class="o">=</span><span class="s2">&quot;10&quot;</span><span class="o">&gt;&lt;/</span><span class="n">textarea</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">button</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;submit-response&quot;</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-primary&quot;</span><span class="o">&gt;</span><span class="n">Submit</span> <span class="n">response</span><span class="o">.&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>It contains a header, plus a slightly more detailed subheader, a <cite>textarea</cite> (as opposed to <cite>blockquote</cite>) where participants can enter their response, and then a submit button.</p>
+<p>Note that at this point neither the <cite>submit-response</cite> button nor the <cite>finish-reading</cite> button will actually do anything. They are added to the page by html, and their appearance is adjusted by css, but to actually have clicking them cause anything to happen we need javascript.</p>
+</div>
+<div class="section" id="instruct-ready-html">
+<h3>instruct-ready.html<a class="headerlink" href="#instruct-ready-html" title="Permalink to this headline">¶</a></h3>
+<p>Now open up the last remaining Bartlett html page, which is in its own folder called “instructions”. It doesn’t need to have its own folder, this is done just for tidiness (often instructions comprise many html pages, not just one). Unlike all the other html pages, however, this page does have a small amount of javascript embedded in it. Let’s skip the first few rows and look at the button:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;row&quot;</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-10&quot;</span><span class="o">&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;col-xs-2&quot;</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="n">button</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;button&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;btn btn-success btn-lg&quot;</span> <span class="n">onClick</span><span class="o">=</span><span class="s2">&quot;dallinger.allowExit(); dallinger.goToPage(&#39;exp&#39;);&quot;</span><span class="o">&gt;</span>
+        <span class="n">Begin</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span>
+    <span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>So, there’s a bunch of html (mostly divs) that are assigned to bootstrap classes to adjust their appearance. You might want to know about <cite>col-xs-</cite>: bootstrap lets you divide your page into columns of different widths. The extra-small columns (i.e. <cite>col-xs-</cite>) are narrow enough that exactly 12 fit across the screen. In this example we create a row, put an empty div that fills the first 10 columns, and then add another div that fills the last two columns and contains a button. This basically means the button ends up towards the right hand side of the screen. But, let’s look at the button itself. First note that it uses slightly different css that the previous buttons being of the class <cite>btn-success</cite> which makes it green (as opposed to blue). But after this som javascript gets added to the button:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">onClick</span><span class="o">=</span><span class="s2">&quot;dallinger.allowExit(); dallinger.goToPage(&#39;exp&#39;);&quot;</span>
+</pre></div>
+</div>
+<p>This means that when the button is clicked (<cite>onClick</cite>) the code within the quote marks is executed. The code is simple and it calls two functions from within the dallinger2.js library (though note again these functions are called with <cite>dallinger.</cite>, and NOT <cite>dallinger2.</cite>). The first function <cite>allowExit()</cite> allows the participant to leave the current page. Dallinger can’t actually stop the participant leaving as browsers (sensibly) won’t let websites take control of the user’s computer, but Dallinger is allowed to create a popup sayin “Are you sure you want to leave?” when the partcipant tries to close the tab or navigate elsewhere. Seeing as this is a case where we want to move the participant on (they have clicked the “Begin” button) we need to disable this system before moving them.</p>
+<p>The next function actually moves the participant on, using <cite>dallinger.goToPage()</cite> and it sends them to exp.html, the page we just looked at (note that you don’t need to include “.html” in the function call).</p>
+<p>Last of all the page calls one more function, again from the dallinger2.js library:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">scripts</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">script</span><span class="o">&gt;</span>
+        <span class="n">dallinger</span><span class="o">.</span><span class="n">createParticipant</span><span class="p">();</span>
+    <span class="o">&lt;/</span><span class="n">script</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This script isn’t attached to an html element (like a button) so it just runs as soon as the page loads. Here its pinging the <cite>createParticipant</cite> function which we covered in earlier sections. This sends a request to the server to create an entry in the Participant table corresponding to this participant. You’ll need to do this at some point in all experiments, but only once per participant, and before the experiment proper starts, <cite>and</cite> after participants have given their consent to take part. Given these constraints the first (and in this case, only) instructions page is ideal.</p>
+</div>
+<div class="section" id="static">
+<h3>Static<a class="headerlink" href="#static" title="Permalink to this headline">¶</a></h3>
+<p>OK, let’s get started with the <cite>static</cite> folder. First there a css folder containing <cite>bootstrap.min.css</cite>, this is the bootstrap css library. Interestingly enough the bootstrap library (at the time of writing) is not included in the shared frontend files (even though the shared front end templates attempt to import it!) and so because Bartlett wants to use it, it has to provide it itself. This is bad practice and in a future version of Dallinger it’ll probably get moved into te shared frontend files so individual experiments don’t need to provide it themselves.</p>
+<p>The <cite>images</cite> folder contains a single image called <cite>logo.png</cite> which is a generic images of something like a certificate. If you search across all files for uses of this image you’ll see it crops up in the base <cite>ad.html</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">lab_logo</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">img</span> <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;adlogo&quot;</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;{{ server_location }}/static/images/logo.png&quot;</span> <span class="n">alt</span><span class="o">=</span><span class="s2">&quot;Lab Logo&quot;</span> <span class="o">/&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>So this image appears on the ad page, alongside the advert text. For individual experiments you can replace the image with your institution or research group logo to make things look a bit nicer.</p>
+<p>Instide the <cite>stimuli</cite> folder (which is a folder unique to Bartlett) are all the stories shown to participants saved in individual markdown files.</p>
+<p>Last of all is the <cite>scripts</cite> folder. This contains two files, one is the markdown library used to read in the stories (and, as we saw, important by Bartlett’s <cite>layout.html</cite>). The other is Bartlett’s <cite>experiment.js</cite> which contains three functions that enable the experiment front end to work. We’ll go through them one by one. First is the <code class="docutils literal notranslate"><span class="pre">(document).ready()</span></code> function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$(document).ready(function() {
+
+  $(&quot;#finish-reading&quot;).click(function() {
+    $(&quot;#stimulus&quot;).hide();
+    $(&quot;#response-form&quot;).show();
+    $(&quot;#submit-response&quot;).removeClass(&#39;disabled&#39;);
+    $(&quot;#submit-response&quot;).html(&#39;Submit&#39;);
+  });
+
+  $(&quot;#submit-response&quot;).click(function() {
+    $(&quot;#submit-response&quot;).addClass(&#39;disabled&#39;);
+    $(&quot;#submit-response&quot;).html(&#39;Sending...&#39;);
+
+    var response = $(&quot;#reproduction&quot;).val();
+
+    $(&quot;#reproduction&quot;).val(&quot;&quot;);
+
+    dallinger.createInfo(my_node_id, {
+      contents: response,
+      info_type: &#39;Info&#39;
+    }).done(function (resp) {
+      create_agent();
+    });
+  });
+
+});
+</pre></div>
+</div>
+<p>We’ll go through this line by line. The first bit simple means that this function should only run when the document (the webpage) is ready (i.e. it as loaded):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$(document).ready(function() {
+</pre></div>
+</div>
+<p>After that it assigns functionality to the different buttons that appear on various pages. First the <cite>finish_reading</cite> button which participant click when they think they have memorized the story is updated so it hides the story, shows the response form and enables the <cite>submit-response</cite> button:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$(&quot;#finish-reading&quot;).click(function() {
+    $(&quot;#stimulus&quot;).hide();
+    $(&quot;#response-form&quot;).show();
+    $(&quot;#submit-response&quot;).removeClass(&#39;disabled&#39;);
+    $(&quot;#submit-response&quot;).html(&#39;Submit&#39;);
+});
+</pre></div>
+</div>
+<p>Note that this code is using dollar signs ($) to reference specific html elements. This uses a javascript library called <cite>jquery</cite> which is ubiquitous across and the web and is included in Dallinger’s shared front end files.</p>
+<p>The <cite>submit-response</cite> button is given slightly more complex functionality:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$(&quot;#submit-response&quot;).click(function() {
+    $(&quot;#submit-response&quot;).addClass(&#39;disabled&#39;);
+    $(&quot;#submit-response&quot;).html(&#39;Sending...&#39;);
+
+    var response = $(&quot;#reproduction&quot;).val();
+
+    $(&quot;#reproduction&quot;).val(&quot;&quot;);
+
+    dallinger.createInfo(my_node_id, {
+        contents: response,
+        info_type: &#39;Info&#39;
+    }).done(function (resp) {
+        create_agent();
+    });
+});
+</pre></div>
+</div>
+<p>So it first disables the button itself, stopping participants from clicking it repeatedly. It then reads whatever they typed in from the <cite>reproduction</cite> html element. The it uses the <cite>createInfo</cite> function to send this back to the server to save it. When this request is completed it calls <cite>create_agent</cite> again to ask for another node.</p>
+<p>We can see the <cite>create_agent</cite> function immediately below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>var create_agent = function() {
+  $(&#39;#finish-reading&#39;).prop(&#39;disabled&#39;, true);
+  dallinger.createAgent()
+    .done(function (resp) {
+      $(&#39;#finish-reading&#39;).prop(&#39;disabled&#39;, false);
+      my_node_id = resp.node.id;
+      get_info();
+    })
+    .fail(function (rejection) {
+      // A 403 is our signal that it&#39;s time to go to the questionnaire
+      if (rejection.status === 403) {
+        dallinger.allowExit();
+        dallinger.goToPage(&#39;questionnaire&#39;);
+      } else {
+        dallinger.error(rejection);
+      }
+    });
+};
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">create_agent</span></code> disables the <cite>finish-reading</cite> button, and then sends a request to the <cite>createAgent</cite> route on the server. If this request succeeds (<code class="docutils literal notranslate"><span class="pre">.done(</span></code>) the <cite>finish-reading</cite> button is re-enabled, the front ends makes a note of the <cite>id</cite> of the node, and the <code class="docutils literal notranslate"><span class="pre">get_info()</span></code> function is called. If the function failes though (<code class="docutils literal notranslate"><span class="pre">.fail(</span></code>) then the participant is sent to the questionnaire.</p>
+<p>The final function is <code class="docutils literal notranslate"><span class="pre">get_info()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>var get_info = function() {
+  // Get info for node
+  dallinger.getReceivedInfos(my_node_id)
+    .done(function (resp) {
+      var story = resp.infos[0].contents;
+      var storyHTML = markdown.toHTML(story);
+      $(&quot;#story&quot;).html(storyHTML);
+      $(&quot;#stimulus&quot;).show();
+      $(&quot;#response-form&quot;).hide();
+      $(&quot;#finish-reading&quot;).show();
+    })
+    .fail(function (rejection) {
+      console.log(rejection);
+      $(&#39;body&#39;).html(rejection.html);
+    });
+};
+</pre></div>
+</div>
+<p>This sends a request to the server to get any of the node’s received Infos. When the rquest is successful it gets the contents of the first Info (there should only be one) and displays it in the <cite>story</cite> html element.</p>
+<p>That’s it. At this point its probably still quite confusing how all these functions, html elements, server code and so on work together. So in the next section we’ll go through the demos again, but this time walking through all their code together.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Dallinger for Programming Novices</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_structure.html">Experiment structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="info.html">Infos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transmission.html">Transmissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transformation.html">Transformations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="network.html">Networks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="participant.html">Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="question.html">Questions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routes.html">Server Routes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="front_end.html">Front end files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dallinger2.html">Dallinger’s Javascript library</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Demo Front Ends</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bartlett1932">Bartlett1932</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="dallinger2.html" title="previous chapter">Dallinger’s Javascript library</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas J. H. Morgan.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+      |
+      <a href="_sources/front_ends.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

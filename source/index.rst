@@ -27,6 +27,7 @@ Dallinger for Programming Novices
    routes
    front_end
    dallinger2
+   front_ends
 
 .. dummies_experiment_rogers
 .. dummies_experiment_chatroom

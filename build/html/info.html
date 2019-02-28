@@ -120,7 +120,7 @@
 </div>
 <div class="section" id="kinds-of-infos">
 <h2>Kinds of Infos<a class="headerlink" href="#kinds-of-infos" title="Permalink to this headline">¶</a></h2>
-<p>Just like with the Node class, Dallinger comes with a bunch of pre-packaged Info types. You can see them in <cite>Dallinger/dallinger.info.py</cite>. If you go there now you will see four subclasses of <code class="docutils literal notranslate"><span class="pre">Info</span></code>: <code class="docutils literal notranslate"><span class="pre">Gene</span></code>, <code class="docutils literal notranslate"><span class="pre">Meme</span></code>, <code class="docutils literal notranslate"><span class="pre">State</span></code> and <code class="docutils literal notranslate"><span class="pre">TrackingEvent</span></code>. But none of these do anything different to the base class <code class="docutils literal notranslate"><span class="pre">Info</span></code> - they are just different names for the same fundamental thing. This might seem a little wasteful, but remember you can often pass the Info <code class="docutils literal notranslate"><span class="pre">type</span></code> as an argument in many functions (e.g. <code class="docutils literal notranslate"><span class="pre">node.infos()</span></code>). This applies to these types of Infos, even though they don’t have any special functions. Thus, you can freely use these types in your experiments and filter by them too, for instance using <code class="docutils literal notranslate"><span class="pre">node.infos(type=Gene)</span></code> to get a Node’s genes. We’ll see an example of this in the Rogers demo later on.</p>
+<p>Just like with the Node class, Dallinger comes with a bunch of pre-packaged Info types. You can see them in <cite>Dallinger/dallinger/information.py</cite>. If you go there now you will see four subclasses of <code class="docutils literal notranslate"><span class="pre">Info</span></code>: <code class="docutils literal notranslate"><span class="pre">Gene</span></code>, <code class="docutils literal notranslate"><span class="pre">Meme</span></code>, <code class="docutils literal notranslate"><span class="pre">State</span></code> and <code class="docutils literal notranslate"><span class="pre">TrackingEvent</span></code>. But none of these do anything different to the base class <code class="docutils literal notranslate"><span class="pre">Info</span></code> - they are just different names for the same fundamental thing. This might seem a little wasteful, but remember you can often pass the Info <code class="docutils literal notranslate"><span class="pre">type</span></code> as an argument in many functions (e.g. <code class="docutils literal notranslate"><span class="pre">node.infos()</span></code>). This applies to these types of Infos, even though they don’t have any special functions. Thus, you can freely use these types in your experiments and filter by them too, for instance using <code class="docutils literal notranslate"><span class="pre">node.infos(type=Gene)</span></code> to get a Node’s genes. We’ll see an example of this in the Rogers demo later on.</p>
 </div>
 </div>
 
@@ -144,6 +144,7 @@
 <p class="caption"><span class="caption-text">Part 2: Understanding Dallinger:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="the_players.html">Introducing the Players</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_structure.html">Experiment structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="the_database.html">The Database</a></li>
 <li class="toctree-l1"><a class="reference internal" href="node.html">Nodes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vector.html">Vectors</a></li>
@@ -162,6 +163,10 @@
 <li class="toctree-l1"><a class="reference internal" href="experiment.html">The Experiment Class</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experiments.html">Demo Experiment Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="communication.html">Communication between the Server and Participants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routes.html">Server Routes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="front_end.html">Front end files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dallinger2.html">Dallinger’s Javascript library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="front_ends.html">Demo Front Ends</a></li>
 </ul>
 
 <div class="relations">
