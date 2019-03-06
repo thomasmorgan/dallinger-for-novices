@@ -16,7 +16,9 @@ The documentation will perdiocally be updated with new pages, or more informatio
 ## Authors
 
 Thomas Morgan
+
 Jesse Snyder
+
 Witek
 
 
